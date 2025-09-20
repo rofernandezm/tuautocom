@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCatalog - Catálogo de Vehículos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Estilos modulares -->
+    <link rel="stylesheet" href="src/styles/global.css">
+    <link rel="stylesheet" href="src/styles/components.css">
+    <link rel="stylesheet" href="src/styles/animations.css">
+</head>
+<body>
+    <!-- Navbar Component -->
+    <nav class="bg-white navbar-shadow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-gray-800">
+                        🚗 <span class="text-indigo-600">AutoCatalog</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <!-- Autos Dropdown -->
+                        <div class="relative group">
+                            <button class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center">
+                                Autos
+                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 slide-down">
+                                <div class="py-2">
+                                    <a href="#" onclick="showCategory('autos', 'hatch')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Hatch</a>
+                                    <a href="#" onclick="showCategory('autos', 'sedan')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Sedan</a>
+                                    <a href="#" onclick="showCategory('autos', 'coupe')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Coupé</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Camionetas Dropdown -->
+                        <div class="relative group">
+                            <button class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center">
+                                Camionetas
+                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 slide-down">
+                                <div class="py-2">
+                                    <a href="#" onclick="showCategory('camionetas', 'suv')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">SUV</a>
+                                    <a href="#" onclick="showCategory('camionetas', 'pickup')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Pickup</a>
+                                    <a href="#" onclick="showCategory('camionetas', 'furgon')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Furgón</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="showAllVehicles()" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                            Ver Todos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-700 hover:text-indigo-600 p-2">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <div class="px-3 py-2 text-sm font-medium text-gray-900">Autos</div>
+                <a href="#" onclick="showCategory('autos', 'hatch')" class="block px-6 py-2 text-sm text-gray-700">Hatch</a>
+                <a href="#" onclick="showCategory('autos', 'sedan')" class="block px-6 py-2 text-sm text-gray-700">Sedan</a>
+                <a href="#" onclick="showCategory('autos', 'coupe')" class="block px-6 py-2 text-sm text-gray-700">Coupé</a>
+                
+                <div class="px-3 py-2 text-sm font-medium text-gray-900 mt-4">Camionetas</div>
+                <a href="#" onclick="showCategory('camionetas', 'suv')" class="block px-6 py-2 text-sm text-gray-700">SUV</a>
+                <a href="#" onclick="showCategory('camionetas', 'pickup')" class="block px-6 py-2 text-sm text-gray-700">Pickup</a>
+                <a href="#" onclick="showCategory('camionetas', 'furgon')" class="block px-6 py-2 text-sm text-gray-700">Furgón</a>
+                
+                <button onclick="showAllVehicles()" class="block w-full text-left px-3 py-2 text-sm text-gray-700 mt-4">Ver Todos</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12 fade-in">
+            <h1 id="pageTitle" class="text-4xl font-bold text-gray-900 mb-4">Catálogo de Vehículos</h1>
+            <p id="pageSubtitle" class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Descubre nuestra amplia selección de autos y camionetas. Encuentra el vehículo perfecto para ti.
+            </p>
+        </div>
+
+        <!-- Filters -->
+        <div class="mb-8 flex flex-wrap gap-4 justify-center">
+            <button onclick="showAllVehicles()" class="px-6 py-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200 transition-colors duration-200">
+                Todos
+            </button>
+            <button onclick="filterByBadge('popular')" class="px-6 py-2 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition-colors duration-200">
+                Más Vistos
+            </button>
+            <button onclick="filterByBadge('cheap')" class="px-6 py-2 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors duration-200">
+                Más Baratos
+            </button>
+        </div>
+
+        <!-- Vehicle Grid -->
+        <div id="vehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Vehicle cards will be populated by JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No se encontraron vehículos</h3>
+            <p class="text-gray-600">Intenta con otra categoría o filtro</p>
+        </div>
+    </main>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-backdrop fixed inset-0" onclick="closeModal()"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+                <div class="p-6">
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900">Consultar Vehículo</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Vehicle Info -->
+                    <div id="modalVehicleInfo" class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <!-- Vehicle info will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Contact Form -->
+                    <form id="contactForm" onsubmit="submitContactForm(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="contactName" class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
+                                <input type="text" id="contactName" name="name" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                                       placeholder="Tu nombre completo">
+                            </div>
+                            
+                            <div>
+                                <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="contactEmail" name="email" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                                       placeholder="tu@email.com">
+                            </div>
+                            
+                            <div>
+                                <label for="contactPhone" class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                                <input type="tel" id="contactPhone" name="phone" required 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                                       placeholder="+1 234 567 8900">
+                            </div>
+                            
+                            <div>
+                                <label for="contactMessage" class="block text-sm font-medium text-gray-700 mb-2">Mensaje</label>
+                                <textarea id="contactMessage" name="message" rows="4" required 
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 resize-none"
+                                          placeholder="Cuéntanos sobre tu interés en este vehículo..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex gap-3">
+                            <button type="button" onclick="closeModal()" 
+                                    class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                    class="flex-1 px-6 py-3 btn-primary text-white rounded-lg font-medium">
+                                Enviar Consulta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center">
+            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>¡Consulta enviada exitosamente!</span>
+        </div>
+    </div>
+
+    <script>
+        // Importar servicios y componentes
+        // Los scripts se cargan de forma modular
+    </script>
+
+    <!-- Servicios -->
+    <script src="src/services/VehicleService.js"></script>
+    <script src="src/services/AnalyticsService.js"></script>
+    
+    <!-- Componentes -->
+    <script src="src/components/Navbar.js"></script>
+    <script src="src/components/VehicleCard.js"></script>
+    <script src="src/components/ContactModal.js"></script>
+    <script src="src/components/Badge.js"></script>
+    
+    <!-- Pages -->
+    <script src="src/pages/AutosPage.js"></script>
+    <script src="src/pages/CamionetasPage.js"></script>
+
+    <script>
+        /**
+         * CatalogApp - Aplicación principal del catálogo
+         * Coordina todos los componentes y servicios
+         */
+        class CatalogApp {
+            constructor() {
+                // Inicializar componentes
+                this.navbar = new Navbar();
+                this.modal = new ContactModal();
+                this.autosPage = new AutosPage();
+                this.camionetasPage = new CamionetasPage();
+                
+                // Estado de la aplicación
+                this.currentVehicles = [];
+                this.currentPage = 'all';
+                
+                // Inicializar analytics
+                AnalyticsService.init({ enabled: true });
+            }
+
+            /**
+             * Inicializa la aplicación
+             */
+            async init() {
+                this.renderComponents();
+                await this.showAllVehicles();
+                this.setupKeyboardNavigation();
+            }
+
+            /**
+             * Renderiza los componentes principales
+             */
+            renderComponents() {
+                // Renderizar navbar
+                document.querySelector('nav').outerHTML = this.navbar.render();
+                
+                // Renderizar modal
+                document.body.insertAdjacentHTML('beforeend', this.modal.render());
+                
+                // Renderizar mensaje de éxito
+                document.body.insertAdjacentHTML('beforeend', `
+                    <div id="successMessage" class="fixed top-4 right-4 z-50 hidden">
+                        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>¡Consulta enviada exitosamente!</span>
+                        </div>
+                    </div>
+                `);
+            }
+
+            /**
+             * Muestra todos los vehículos
+             */
+            async showAllVehicles() {
+                try {
+                    this.currentVehicles = await VehicleService.getAllVehicles();
+                    this.currentPage = 'all';
+                    this.updatePageTitle('Catálogo de Vehículos', 'Descubre nuestra amplia selección de autos y camionetas');
+                    this.renderVehicles(this.currentVehicles);
+                    
+                    // Analytics
+                    AnalyticsService.trackEvent('show_all_vehicles');
+                } catch (error) {
+                    console.error('Error loading vehicles:', error);
+                }
+            }
+
+            /**
+             * Muestra vehículos por categoría
+             * @param {string} type - Tipo de vehículo
+             * @param {string} category - Categoría específica
+             */
+            showCategory(type, category) {
+                this.currentVehicles = VehicleService.getVehiclesByCategory(type, category);
+                this.currentPage = `${type}-${category}`;
+                
+                const categoryNames = {
+                    hatch: 'Hatchbacks',
+                    sedan: 'Sedanes',
+                    coupe: 'Coupés',
+                    suv: 'SUVs',
+                    pickup: 'Pickups',
+                    furgon: 'Furgones'
+                };
+                
+                this.updatePageTitle(
+                    categoryNames[category], 
+                    `Explora nuestra selección de ${categoryNames[category].toLowerCase()}`
+                );
+                this.renderVehicles(this.currentVehicles);
+                this.navbar.closeMobileMenu();
+                
+                // Analytics
+                AnalyticsService.trackCategoryNavigation(type, category);
+            }
+
+            /**
+             * Filtra vehículos por distintivo
+             * @param {string} badgeType - Tipo de distintivo
+             */
+            filterByBadge(badgeType) {
+                const filtered = VehicleService.filterByBadge(this.currentVehicles, badgeType);
+                const badgeNames = {
+                    popular: 'Más Vistos',
+                    cheap: 'Más Baratos'
+                };
+                
+                this.updatePageTitle(
+                    badgeNames[badgeType], 
+                    `Vehículos destacados en la categoría ${badgeNames[badgeType].toLowerCase()}`
+                );
+                this.renderVehicles(filtered);
+                
+                // Analytics
+                AnalyticsService.trackFilterUsage('badge', badgeType);
+            }
+
+            /**
+             * Actualiza el título de la página
+             * @param {string} title - Título principal
+             * @param {string} subtitle - Subtítulo
+             */
+            updatePageTitle(title, subtitle) {
+                const titleEl = document.getElementById('pageTitle');
+                const subtitleEl = document.getElementById('pageSubtitle');
+                
+                if (titleEl) titleEl.textContent = title;
+                if (subtitleEl) subtitleEl.textContent = subtitle;
+            }
+
+            /**
+             * Renderiza la grilla de vehículos
+             * @param {Array} vehicles - Array de vehículos
+             */
+            renderVehicles(vehicles) {
+                const grid = document.getElementById('vehicleGrid');
+                const emptyState = document.getElementById('emptyState');
+                
+                if (!vehicles || vehicles.length === 0) {
+                    grid.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                
+                const vehicleCards = vehicles.map(vehicle => VehicleCard.render(vehicle)).join('');
+                grid.innerHTML = vehicleCards;
+                
+                // Aplicar animación escalonada
+                const cards = grid.querySelectorAll('.card-hover');
+                cards.forEach((card, index) => {
+                    card.classList.add('stagger-item');
+                    card.style.animationDelay = `${index * 0.1}s`;
+                });
+            }
+
+            /**
+             * Configura navegación por teclado
+             */
+            setupKeyboardNavigation() {
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        this.modal.closeModal();
+                        this.navbar.closeMobileMenu();
+                    }
+                });
+            }
+        }
+
+        // Crear instancia global de la aplicación
+        window.CatalogApp = new CatalogApp();
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            CatalogApp.init();
+        });
+
+        // Funciones globales para compatibilidad (legacy)
+        function showCategory(type, category) {
+            CatalogApp.showCategory(type, category);
+        }
+
+        function showAllVehicles() {
+            CatalogApp.showAllVehicles();
+        }
+
+        function filterByBadge(badgeType) {
+            CatalogApp.filterByBadge(badgeType);
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'981d42d4d455db36',t:'MTc1ODMyODcxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
