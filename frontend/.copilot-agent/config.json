@@ -1,0 +1,106 @@
+{
+  "agent": {
+    "name": "TuAutocom Copilot Agent",
+    "version": "2.0.0",
+    "description": "Advanced development agent for TuAutocom frontend with v0 and GitHub Copilot capabilities",
+    "workspace": "frontend",
+    "features": {
+      "development": {
+        "server_management": true,
+        "component_creation": true,
+        "workspace_relative_paths": true,
+        "environment_setup": true
+      },
+      "v0_integration": {
+        "ai_sdk": true,
+        "component_templates": true,
+        "mermaid_diagrams": true,
+        "best_practices": true,
+        "documentation": true
+      },
+      "copilot_advanced": {
+        "code_analysis": true,
+        "refactoring": true,
+        "debugging": true,
+        "test_generation": true,
+        "optimization": true,
+        "code_review": true,
+        "documentation_generation": true,
+        "security_scanning": true,
+        "workflow_automation": true
+      }
+    },
+    "knowledge_base": {
+      "docs_path": "docs/",
+      "v0_capabilities": "docs/v0-capabilities.md",
+      "ai_sdk_guide": "docs/ai-sdk-guide.md",
+      "component_templates": "docs/component-templates.md",
+      "mermaid_templates": "docs/mermaid-templates.md",
+      "navigation": "docs/README.md"
+    }
+  },
+  "commands": {
+    "basic": [
+      "setup",
+      "start-server", 
+      "create-component"
+    ],
+    "v0": [
+      "v0-help",
+      "create-ai-component",
+      "setup-ai-sdk",
+      "generate-diagram"
+    ],
+    "copilot_advanced": [
+      "analyze-code",
+      "refactor",
+      "debug-help",
+      "generate-tests",
+      "optimize",
+      "code-review",
+      "generate-docs",
+      "security-scan",
+      "workflow-setup"
+    ]
+  },
+  "templates": {
+    "components": {
+      "ui": "Modern UI components with TypeScript",
+      "page": "Page components with routing",
+      "service": "Service layer components",
+      "ai": "AI-powered components with Vercel SDK"
+    },
+    "diagrams": {
+      "architecture": "System architecture diagrams",
+      "flow": "Process flow diagrams", 
+      "database": "Database relationship diagrams",
+      "deployment": "Deployment and infrastructure diagrams"
+    },
+    "workflows": {
+      "ci_cd": "Complete CI/CD pipelines",
+      "testing": "Automated testing workflows",
+      "security": "Security scanning workflows",
+      "performance": "Performance monitoring workflows"
+    }
+  },
+  "integrations": {
+    "frameworks": ["React", "Next.js", "Vite", "TypeScript"],
+    "styling": ["Tailwind CSS", "shadcn/ui", "CSS Modules"],
+    "testing": ["Vitest", "Jest", "Playwright", "Testing Library"],
+    "tools": ["ESLint", "Prettier", "Husky", "lint-staged"],
+    "ai": ["Vercel AI SDK", "OpenAI", "Anthropic"],
+    "deployment": ["Vercel", "Netlify", "GitHub Pages"],
+    "monitoring": ["Lighthouse", "Web Vitals", "Sentry"]
+  },
+  "paths": {
+    "components": "src/components/",
+    "pages": "src/pages/",
+    "services": "src/services/",
+    "styles": "src/styles/",
+    "utils": "src/utils/",
+    "types": "src/types/",
+    "tests": "src/__tests__/",
+    "docs": "docs/",
+    "config": "./"
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "$schema": "https://schemas.github.com/copilot/agent/v1/agent-schema.json",
+  "name": "frontend-agent",
+  "version": "0.3.0",
+  "description": "Agente Copilot para frontend de tuautocom con funcionalidades de v0 de Vercel y capacidades avanzadas de GitHub Copilot",
+  "entry": "./index.ts",
+  "commands": [
+    {
+      "name": "/start-server",
+      "description": "Ejecuta live-server en el directorio frontend",
+      "parameters": [],
+      "examples": ["/start-server"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/setup",
+      "description": "Configura Node, pnpm y dependencias del proyecto",
+      "parameters": [],
+      "examples": ["/setup"],
+      "output": {
+        "type": "text", 
+        "markdown": true
+      }
+    },
+    {
+      "name": "/update-readme",
+      "description": "Actualiza el README.md del frontend con los cambios recientes",
+      "parameters": [],
+      "examples": ["/update-readme"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/create-component",
+      "description": "Genera componentes React optimizados siguiendo las mejores prácticas de v0",
+      "parameters": [
+        {
+          "name": "componentName",
+          "description": "Nombre del componente a crear",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "type",
+          "description": "Tipo de componente: ui, page, layout, modal",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/create-component VehicleGrid", "/create-component LoginModal modal"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/setup-nextjs",
+      "description": "Configura un proyecto Next.js con App Router y mejores prácticas de v0",
+      "parameters": [],
+      "examples": ["/setup-nextjs"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/ai-integration",
+      "description": "Integra Vercel AI SDK para chatbots y funcionalidades de IA",
+      "parameters": [
+        {
+          "name": "feature",
+          "description": "Tipo de integración: chatbot, text-generation, streaming",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/ai-integration", "/ai-integration chatbot"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/create-diagram",
+      "description": "Genera diagramas Mermaid para documentación técnica",
+      "parameters": [
+        {
+          "name": "type",
+          "description": "Tipo de diagrama: flowchart, sequence, class, er",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "description": "Descripción del diagrama a generar",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "examples": ["/create-diagram flowchart \"flujo de autenticación\"", "/create-diagram sequence \"interacción usuario-API\""],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/migrate-ai-sdk",
+      "description": "Migra de openai-edge a Vercel AI SDK",
+      "parameters": [],
+      "examples": ["/migrate-ai-sdk"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/docs",
+      "description": "Consulta la documentación interna del agente sobre v0 y AI SDK",
+      "parameters": [
+        {
+          "name": "topic",
+          "description": "Tema a consultar: capabilities, ai-sdk, components, diagrams, all",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/docs", "/docs ai-sdk", "/docs components"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/analyze-code",
+      "description": "Analiza código para detectar problemas, mejoras y optimizaciones",
+      "parameters": [
+        {
+          "name": "filePath",
+          "description": "Ruta del archivo a analizar (opcional, usa archivo actual si no se especifica)",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "focus",
+          "description": "Área de enfoque: performance, security, accessibility, maintainability, all",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/analyze-code", "/analyze-code src/components/VehicleCard.js", "/analyze-code . security"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/refactor",
+      "description": "Sugiere refactorizaciones para mejorar la calidad del código",
+      "parameters": [
+        {
+          "name": "target",
+          "description": "Qué refactorizar: function, component, class, file, extract-component",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "filePath",
+          "description": "Ruta del archivo (opcional, usa archivo actual)",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/refactor component", "/refactor extract-component src/pages/AutosPage.js"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/debug-help",
+      "description": "Ayuda a debuggear problemas comunes y errores en el código",
+      "parameters": [
+        {
+          "name": "error",
+          "description": "Descripción del error o problema",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "type",
+          "description": "Tipo de problema: javascript, react, css, build, runtime",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/debug-help", "/debug-help \"Uncaught TypeError\" javascript", "/debug-help react"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/generate-tests",
+      "description": "Genera tests unitarios y de integración para componentes y funciones",
+      "parameters": [
+        {
+          "name": "target",
+          "description": "Qué testear: component, function, api, e2e",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "filePath",
+          "description": "Ruta del archivo a testear",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/generate-tests component", "/generate-tests function src/services/VehicleService.js"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/optimize",
+      "description": "Optimiza rendimiento, bundle size y experiencia de usuario",
+      "parameters": [
+        {
+          "name": "type",
+          "description": "Tipo de optimización: performance, bundle, images, accessibility, seo",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "scope",
+          "description": "Alcance: file, component, page, app",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/optimize performance", "/optimize bundle src/components", "/optimize accessibility"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/code-review",
+      "description": "Realiza review del código siguiendo mejores prácticas",
+      "parameters": [
+        {
+          "name": "scope",
+          "description": "Alcance del review: file, component, pr, commit",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "checklist",
+          "description": "Checklist específico: security, performance, maintainability, style",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/code-review", "/code-review component", "/code-review pr security"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/generate-docs",
+      "description": "Genera documentación automática para código y APIs",
+      "parameters": [
+        {
+          "name": "type",
+          "description": "Tipo de documentación: api, component, function, readme, changelog",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "format",
+          "description": "Formato: markdown, jsdoc, typescript, openapi",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/generate-docs api", "/generate-docs component markdown", "/generate-docs readme"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/security-scan",
+      "description": "Escanea código en busca de vulnerabilidades de seguridad",
+      "parameters": [
+        {
+          "name": "scope",
+          "description": "Alcance: dependencies, code, config, all",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/security-scan", "/security-scan dependencies", "/security-scan code"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    },
+    {
+      "name": "/workflow-setup",
+      "description": "Configura workflows de CI/CD, GitHub Actions y automatización",
+      "parameters": [
+        {
+          "name": "type",
+          "description": "Tipo de workflow: ci, cd, testing, linting, security",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "platform",
+          "description": "Plataforma: github-actions, vercel, netlify",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": ["/workflow-setup ci", "/workflow-setup cd vercel", "/workflow-setup testing"],
+      "output": {
+        "type": "text",
+        "markdown": true
+      }
+    }
+  ]
+}
