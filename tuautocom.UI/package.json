@@ -1,0 +1,33 @@
+{
+  "name": "tuautocom-ui",
+  "version": "1.0.0",
+  "description": "Frontend application for TuAutoCom - Built with Vanilla JavaScript and Tailwind CSS",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "dev:sass": "sass --watch styles/input.scss:styles/temp.css",
+    "dev:tailwind": "pnpm exec tailwindcss -i ./styles/temp.css -o ./styles/output.css --watch",
+    "dev": "concurrently \"pnpm:dev:sass\" \"pnpm:dev:tailwind\"",
+    "build:sass": "sass styles/input.scss:styles/temp.css",
+    "build:tailwind": "pnpm exec tailwindcss -i ./styles/temp.css -o ./styles/output.css",
+    "build": "pnpm build:sass && pnpm build:tailwind",
+    "build:prod": "pnpm build:sass && pnpm exec tailwindcss -i ./styles/temp.css -o ./styles/output.css --minify",
+    "serve": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "vanilla-js",
+    "tailwindcss",
+    "es-modules",
+    "frontend"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.0",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.6",
+    "sass": "^1.93.2",
+    "tailwindcss": "3.4.17"
+  }
+}

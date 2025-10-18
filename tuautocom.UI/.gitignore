@@ -1,0 +1,8 @@
+node_modules/
+.pnpm-store/
+.DS_Store
+*.log
+.env
+dist/
+styles/output.css
+styles/temp.css

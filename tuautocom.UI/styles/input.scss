@@ -1,0 +1,41 @@
+/**
+ * Main Styles - TuAutoCom UI
+ * 
+ * Este archivo SCSS es el punto de entrada para todos los estilos.
+ * Orden de importación:
+ * 1. CSS Variables (desde theme.js)
+ * 2. Tailwind directives
+ * 3. Custom styles (si es necesario)
+ */
+
+/* ============================================
+   CSS Variables - Sincronizadas con theme.js
+   ============================================ */
+:root {
+  /* Colores principales */
+  --color-primary-dark: #10231c;
+  --color-primary-medium: #214a3c;
+  --color-primary-light: #8ecdb7;
+  
+  /* Agregar más variables según necesidad */
+}
+
+/* ============================================
+   Tailwind CSS Directives
+   ============================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Custom Styles (SASS)
+   ============================================ */
+
+/* Ejemplo de uso de variables CSS en SASS:
+.my-component {
+  background-color: var(--color-primary-dark);
+  color: var(--color-primary-light);
+}
+*/
+
+/* Los estilos custom específicos van aquí */
