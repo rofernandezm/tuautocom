@@ -859,10 +859,26 @@ Cambio detectado → Proponer actualización → Confirmar → Actualizar → Im
 
 ### Al Final de cada Sesión
 
-**Crear archivo de sesión**:
-1. Documentar decisiones tomadas
-2. Listar cambios realizados
-3. Incluir próximos pasos
-4. Guardar en `.vscode/agent/sessions/YYYY-MM-DD-descripcion.md`
+**🎯 Comando Rápido para Cerrar Sesión:**
+```
+"Cierra sesion y documenta todo"
+```
+
+**Esto automáticamente ejecutará:**
+1. ✅ Generar resumen completo de la sesión
+2. ✅ Crear archivo en `.vscode/agent/sessions/YYYY-MM-DD-descripcion.md`
+3. ✅ Documentar decisiones tomadas
+4. ✅ Listar cambios realizados
+5. ✅ Incluir próximos pasos sugeridos
+6. ✅ Proponer actualizaciones a AGENT.md/CONTEXT.md si aplica
+7. ✅ Sugerir commits con los cambios
+
+**Checklist Manual (si no usas el comando):**
+- [ ] Documentar decisiones tomadas
+- [ ] Listar cambios realizados
+- [ ] Incluir próximos pasos
+- [ ] Guardar en `.vscode/agent/sessions/YYYY-MM-DD-descripcion.md`
+- [ ] Actualizar CONTEXT.md si cambió el estado del proyecto
+- [ ] Actualizar AGENT.md si hay nuevos patrones/estándares
 
 **Este documento debe evolucionar con el proyecto, pero siempre con confirmación explícita.**
