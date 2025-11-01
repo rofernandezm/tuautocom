@@ -10,60 +10,12 @@
       href="https://fonts.googleapis.com/css2?display=swap&family=Inter:wght@400;500;700;900&family=Noto+Sans:wght@400;500;700;900"
     />
     <link rel="stylesheet" href="/styles/output.css">
+  <!-- Temporal: incluir Tailwind CDN para debug rápido (remover antes de producción) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div id="app"></div>
 
-    <!-- Demo integration of core components (temporary) -->
-    <script type="module">
-      import { Header } from './js/components/Header.js';
-      import { HeroSection } from './js/components/HeroSection.js';
-      import { CategoryFilters } from './js/components/CategoryFilters.js';
-      import { VehicleCard } from './js/components/VehicleCard.js';
-      import { Footer } from './js/components/Footer.js';
-
-      const testCategories = [
-        { id: 'all', label: 'Todos' },
-        { id: 'sedan', label: 'Sedán' },
-        { id: 'suv', label: 'SUV' },
-        { id: 'pickup', label: 'Pick-up' },
-        { id: 'electric', label: 'Eléctricos' }
-      ];
-
-      const testVehicles = [
-        { id: 'v1', image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop', title: 'Toyota Camry 2024', description: 'Sedán ejecutivo con tecnología híbrida avanzada', badge: { text: 'Popular' } },
-        { id: 'v2', image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=300&fit=crop', title: 'Ford Explorer 2024', description: 'SUV espacioso ideal para familias', badge: { text: 'Nuevo' } },
-        { id: 'v3', image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&h=300&fit=crop', title: 'Tesla Model 3', description: 'Sedán eléctrico con autopilot incluido', badge: { text: 'Eléctrico' } },
-        { id: 'v4', image: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=400&h=300&fit=crop', title: 'Honda CR-V 2024', description: 'SUV compacto con excelente economía de combustible' }
-      ];
-
-      function renderApp() {
-        const app = document.getElementById('app');
-
-        const header = new Header({ logo: 'TuAutoCom', links: [ { label: 'Inicio', url: '#' }, { label: 'Catálogo', url: '#' }, { label: 'Contacto', url: '#' } ] });
-        app.appendChild(header.render());
-
-        const hero = new HeroSection({ title: 'Encuentra tu Auto Ideal', subtitle: 'Explora nuestra selección', backgroundImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=400&fit=crop' });
-        app.appendChild(hero.render());
-
-        const container = document.createElement('div');
-        container.className = 'max-w-7xl mx-auto px-5 py-10';
-
-        const filters = new CategoryFilters({ categories: testCategories, activeCategory: 'all' });
-        container.appendChild(filters.render());
-
-        const grid = document.createElement('div');
-        grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8';
-        testVehicles.forEach(v => grid.appendChild(new VehicleCard({ ...v, onClick: () => alert(v.title) }).render()));
-        container.appendChild(grid);
-
-        app.appendChild(container);
-
-        const footer = new Footer({ copyrightYear: new Date().getFullYear(), copyrightText: 'TuAutoCom. Todos los derechos reservados.'});
-        app.appendChild(footer.render());
-      }
-
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderApp); else renderApp();
-    </script>
+    <script type="module" src="/js/main.js"></script>
 </body>
 </html>

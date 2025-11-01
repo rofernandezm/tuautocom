@@ -12,7 +12,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // Importamos el componente Header que acabamos de crear
-import { Header } from './components/Header.js';
+import { HomeView } from './views/HomeView.js';
 
 // 📝 NOTA EDUCATIVA:
 // La extensión .js es REQUERIDA en ES Modules del navegador
@@ -29,47 +29,21 @@ import { Header } from './components/Header.js';
  * Esta función se ejecuta cuando el DOM está completamente cargado
  * Es equivalente a $(document).ready() de jQuery
  */
-function initApp() {
+async function initApp() {
   console.log('🚀 TuAutoCom Application Started');
-  
-  // 1. Obtener el contenedor principal del body
-  // 📝 NOTA: En index.html buscaremos un elemento con id="app"
+
   const appContainer = document.getElementById('app');
-  
   if (!appContainer) {
     console.error('❌ No se encontró el contenedor #app');
     return;
   }
-  
-  // 2. Crear instancia del Header
-  // 📝 NOTA EDUCATIVA:
-  // - new Header() llama al constructor
-  // - Pasamos configuración inicial
-  // - El objeto retornado tiene el método .render()
-  const header = new Header({
-    currentRoute: 'inicio',
-    showSearch: true,
-    onNavigate: (route) => {
-      console.log(`📍 Usuario navegó a: ${route}`);
-      // 📝 TODO: Aquí cargaremos la vista correspondiente
-    }
-  });
-  
-  // 3. Renderizar el header
-  // 📝 NOTA EDUCATIVA:
-  // - .render() retorna un HTMLElement
-  // - appendChild lo agrega al DOM
-  // - Ahora el header es visible en la página
-  const headerElement = header.render();
-  appContainer.appendChild(headerElement);
-  
-  console.log('✅ Header renderizado exitosamente');
-  
-  // 📝 TODO: Renderizar el resto de la página
-  // - Hero section
-  // - Category filters
-  // - Vehicle grid
-  // - Footer
+
+  // Crear y montar la HomeView
+  const homeView = new HomeView();
+  await homeView.init();
+  appContainer.appendChild(homeView.render());
+
+  console.log('✅ HomeView montada correctamente');
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
