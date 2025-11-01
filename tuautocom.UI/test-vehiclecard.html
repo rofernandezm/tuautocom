@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - VehicleCard | TuAutoCom</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { 'primary-dark': '#10231c','primary-medium': '#214a3c','primary-light': '#8ecdb7' } } }
+    }
+  </script>
+</head>
+<body class="bg-primary-dark min-h-screen text-white">
+  <div id="app" class="max-w-7xl mx-auto p-6"></div>
+
+  <script type="module">
+    import { VehicleCard } from './js/components/VehicleCard.js';
+
+    const vehicles = [
+      { id: 'v1', image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop', title: 'Toyota Camry 2024', description: 'Sedán ejecutivo con tecnología híbrida avanzada', badge: { text: 'Popular' } },
+      { id: 'v2', image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=300&fit=crop', title: 'Ford Explorer 2024', description: 'SUV espacioso ideal para familias', badge: { text: 'Nuevo' } },
+      { id: 'v3', image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&h=300&fit=crop', title: 'Tesla Model 3', description: 'Sedán eléctrico con autopilot incluido', badge: { text: 'Eléctrico' } },
+      { id: 'v4', image: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=400&h=300&fit=crop', title: 'Honda CR-V 2024', description: 'SUV compacto con excelente economía de combustible' },
+      { id: 'v5', image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop', title: 'BMW Serie 3', description: 'Lujo y deportividad en perfecta armonía', badge: { text: 'Premium' } },
+      { id: 'v6', image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=300&fit=crop', title: 'Chevrolet Silverado', description: 'Pick-up de trabajo pesado con gran capacidad' }
+    ];
+
+    const app = document.getElementById('app');
+
+    const grid = document.createElement('div');
+    grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+
+    vehicles.forEach(v => {
+      const card = new VehicleCard({ ...v, onClick: (data) => alert(`Seleccionaste: ${data.title}`) });
+      grid.appendChild(card.render());
+    });
+
+    app.appendChild(grid);
+  </script>
+</body>
+</html>
