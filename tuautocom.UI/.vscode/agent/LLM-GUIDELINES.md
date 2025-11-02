@@ -26,6 +26,17 @@ Claude Sonnet 4.5 SÍ:
 ✅ Lee y entiende el contexto completo
 ✅ Valida cada decisión contra estándares
 ✅ Explica el razonamiento detrás de cada acción
+
+### ⚠️ Nota obligatoria para modelos
+
+Antes de ejecutar cambios o proponer implementaciones en este repositorio, cualquier modelo LLM debe:
+
+- Leer y comprender `AGENT.md` (instrucciones del agente).
+- Leer y comprender `LLM-GUIDELINES.md` (este documento).
+- Leer y comprender `CONTEXT.md` (estado y decisiones del proyecto).
+- Revisar la última sesión en `.vscode/agent/sessions/`.
+
+El modelo debe confirmar explícitamente en español que realizó estas lecturas y que seguirá las pautas.
 ```
 
 **Ejemplo de proceso mental:**

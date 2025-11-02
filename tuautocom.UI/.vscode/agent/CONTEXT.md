@@ -94,6 +94,16 @@ tuautocom.UI/
 - **Principio**: No implementar sin confirmación previa
 - **Estilo**: Explicar conceptos mientras se implementa (learning by doing)
 
+## 🧾 Nota para modelos LLM
+
+Este repositorio requiere que cualquier modelo LLM que participe en la edición o proposición de cambios:
+
+- Lea `AGENT.md` para conocer patrones y estándares.
+- Lea `LLM-GUIDELINES.md` para entender la metodología de razonamiento y verificación.
+- Lea `CONTEXT.md` para conocer el estado actual del proyecto.
+
+El modelo debe confirmar en español que realizó estas lecturas antes de proceder con cualquier cambio. Si el modelo no tiene acceso a los archivos locales, debe solicitar la información al usuario.
+
 ## 📊 Progreso del Proyecto
 
 ### Sesiones de Desarrollo

@@ -6,13 +6,47 @@
 
 ## ⚠️ INSTRUCCIONES CRÍTICAS PARA EL AGENTE
 
-### 📌 USO DE ESTE DOCUMENTO
+### 📌 USO DE ESTE DOCUMENT
 
 1. **SIEMPRE consultar este documento** antes de implementar cualquier funcionalidad
 2. **SIEMPRE proponer actualizaciones** cuando se tomen nuevas decisiones arquitectónicas
 3. **SIEMPRE pedir confirmación** antes de actualizar este documento
 4. **NUNCA ignorar** los patrones y estándares establecidos aquí
 5. **NUNCA implementar** sin antes validar contra estas instrucciones
+
+### 🧾 OBLIGATORIO PARA MODELOS LLM
+
+Toda instancia de un modelo (LLM) que vaya a trabajar en este repositorio debe cumplir explícitamente las siguientes acciones antes de ejecutar cualquier cambio o propuesta de implementación:
+
+- Leer y comprender completamente `AGENT.md` (este archivo).
+- Leer y comprender `LLM-GUIDELINES.md` (metodología de razonamiento y verificación).
+- Leer y comprender `CONTEXT.md` (estado actual del proyecto y decisiones previas).
+- Leer la última sesión disponible en `.vscode/agent/sessions/`.
+- Confirmar en español al usuario (o en el log de la sesión) que estas lecturas se realizaron y que el modelo seguirá las pautas.
+
+Notas importantes:
+- Estas lecturas son obligatorias para cualquier modelo que realice cambios en el código o proponga implementaciones. No seguir estas lecturas se considera incumplimiento de las políticas del proyecto.
+- Las excepciones al idioma (nombres de variables, código fuente, comandos de terminal, nombres de archivos) se mantienen como en la sección "IDIOMA DE COMUNICACIÓN".
+
+Si el modelo no tiene acceso a alguno de los archivos locales mencionados, debe solicitar explícitamente al usuario acceso o una confirmación antes de proceder.
+
+### 🌐 IDIOMA DE COMUNICACIÓN
+
+**⚠️ IMPORTANTE**: Todo el diálogo y comunicación con el usuario debe ser en **ESPAÑOL**.
+
+- ✅ Respuestas al usuario: **Español**
+- ✅ Explicaciones de código: **Español**
+- ✅ Mensajes de error/validación: **Español**
+- ✅ Documentación de sesiones: **Español**
+- ✅ Comentarios en código: **Español**
+- ✅ Commits sugeridos: **Español**
+
+**Excepciones** (usar inglés):
+- ❌ Nombres de variables, funciones, clases (camelCase, PascalCase)
+- ❌ Código fuente JavaScript
+- ❌ Nombres de archivos
+- ❌ Comandos de terminal
+- ❌ Documentación técnica de APIs externas
 
 ### 🔄 Proceso de Actualización
 
@@ -1444,6 +1478,10 @@ pnpm build
 
 ## 🔄 VERSIONADO DE ESTE DOCUMENTO
 
+-**v1.3.1** - 2025-11-02
+- **Agregado requisito para modelos LLM**: Se exige que cualquier modelo lea y confirme `AGENT.md`, `LLM-GUIDELINES.md` y `CONTEXT.md` antes de ejecutar cambios.
+- Definidas excepciones para uso de inglés (código, variables, comandos)
+
 **v1.2.0** - 2025-10-18
 - Implementado sistema de tema centralizado (`js/config/theme.js`)
 - Agregado SASS para estilos custom
@@ -1463,8 +1501,8 @@ pnpm build
 
 ---
 
-**Última actualización**: 2025-10-18
-**Próxima revisión**: Después de implementar los primeros 3 componentes
+**Última actualización**: 2025-11-02
+**Próxima revisión**: Después de implementar búsqueda funcional en HomeView
 
 ---
 

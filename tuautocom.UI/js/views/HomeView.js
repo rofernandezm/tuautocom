@@ -19,6 +19,9 @@ export class HomeView {
     this.featuredVehicles = [];
     this.cheapestVehicles = [];
     this.mostVisitedVehicles = [];
+    // Elementos y bindings para búsqueda
+    this._searchResultsSection = null;
+    this._onSearchBound = this._onSearch.bind(this);
   }
 
   /**
@@ -33,7 +36,8 @@ export class HomeView {
       this.cheapestVehicles = await vehicleService.getCheapest();
       this.mostVisitedVehicles = await vehicleService.getMostVisited();
     } catch (error) {
-      console.error('Error loading HomeView data:', error);
+      // Mensaje en español según AGENT.md
+      console.error('Error al cargar los datos de HomeView:', error);
       this.categories = [];
       this.featuredVehicles = [];
       this.cheapestVehicles = [];
@@ -53,6 +57,10 @@ export class HomeView {
     const header = new Header({ logo: 'TuAutoCom', links: [ { label: 'Inicio', url: '#' }, { label: 'Catálogo', url: '#' }, { label: 'Contacto', url: '#' } ] });
     this.container.appendChild(header.render());
 
+    // Escuchar búsquedas emitidas por Header
+    // El Header emite un CustomEvent 'search' en document
+    document.addEventListener('search', this._onSearchBound);
+
     // Hero
     const hero = new HeroSection({ title: 'Encuentra tu Auto Ideal', subtitle: 'Explora nuestra selección de vehículos nuevos y seminuevos', backgroundImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=400&fit=crop' });
     this.container.appendChild(hero.render());
@@ -62,7 +70,7 @@ export class HomeView {
     main.className = 'max-w-7xl mx-auto px-5 py-10';
 
     // Category filters
-    const filters = new CategoryFilters({ categories: this.categories, activeCategory: 'all', onChange: (id) => console.log('Filtro:', id) });
+  const filters = new CategoryFilters({ categories: this.categories, activeCategory: 'all', onChange: (id) => this._onFilterChange(id) });
     main.appendChild(filters.render());
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -120,10 +128,97 @@ export class HomeView {
   }
 
   /**
+   * Handler del evento 'search' emitido por Header
+   * @private
+   * @param {CustomEvent} event
+   */
+  async _onSearch(event) {
+    try {
+      const query = event?.detail?.query || '';
+      if (!query) return;
+
+      // Obtener todos los vehículos y filtrar por título/descripcion
+      const all = await vehicleService.getAll();
+      const q = query.toLowerCase();
+      const results = all.filter(v => {
+        const title = (v.title || '').toLowerCase();
+        const desc = (v.description || '').toLowerCase();
+        return title.includes(q) || desc.includes(q);
+      });
+
+      this._renderSearchResults(results, query);
+    } catch (error) {
+      // Mensaje en español según AGENT.md
+      console.error('Error al procesar la búsqueda en HomeView:', error);
+    }
+  }
+
+  /**
+   * Maneja el cambio de categoría desde CategoryFilters
+   * @private
+   * @param {string} categoryId
+   */
+  _onFilterChange(categoryId) {
+    // 📝 NOTA EDUCATIVA: Aquí se puede implementar la lógica de filtrado
+    // por categoría y re-renderizado de la vista. Por ahora guardamos
+    // la categoría activa en el estado local para usos futuros.
+    this._activeCategory = categoryId;
+  }
+
+  /**
+   * Renderiza o actualiza la sección de resultados de búsqueda
+   * @private
+   * @param {Array<Object>} results
+   * @param {string} query
+   */
+  _renderSearchResults(results = [], query = '') {
+    // Si ya existe una sección previa, removerla
+    if (this._searchResultsSection && this._searchResultsSection.remove) {
+      this._searchResultsSection.remove();
+      this._searchResultsSection = null;
+    }
+
+    const section = document.createElement('section');
+    section.className = 'my-6';
+
+    const title = document.createElement('h3');
+    title.className = 'text-xl font-bold mb-3';
+    title.textContent = `Resultados para "${query}" (${results.length})`;
+    section.appendChild(title);
+
+    if (!results.length) {
+      const empty = document.createElement('p');
+      empty.className = 'text-sm text-primary-light';
+      empty.textContent = 'No se encontraron vehículos que coincidan con la búsqueda.';
+      section.appendChild(empty);
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+
+      results.forEach(v => {
+        const card = new VehicleCard(v);
+        grid.appendChild(card.render());
+      });
+
+      section.appendChild(grid);
+    }
+
+    // Insertar la sección de resultados al inicio del main (después del hero)
+    const main = this.container.querySelector('div.max-w-7xl');
+    if (main) {
+      main.insertBefore(section, main.firstChild);
+      this._searchResultsSection = section;
+    }
+  }
+
+  /**
    * destroy - limpiar recursos asociados a la vista
    */
   destroy() {
     // Placeholder: remover listeners, timers, etc.
+    // Remover listener de búsqueda
+    document.removeEventListener('search', this._onSearchBound);
+
     if (this.container && this.container.remove) this.container.remove();
   }
 }
