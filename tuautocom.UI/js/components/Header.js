@@ -115,7 +115,8 @@ export class Header {
         </nav>
         
         <!-- Botones de acción -->
-        <div class="flex gap-2">
+        <div class="flex gap-2 relative">
+          ${this._renderSearchInput()}
           ${this._renderAuthButton()}
           ${this.showSearch ? this._renderSearchButton() : ''}
         </div>
@@ -205,6 +206,28 @@ export class Header {
   }
   
   /**
+   * Renderiza el input de búsqueda con botón (oculto por defecto)
+   */
+  _renderSearchInput() {
+    return `
+      <div class="search-container hidden absolute right-0 top-12 flex items-center gap-2 bg-white p-2 rounded-lg z-50 shadow-lg">
+        <input
+          type="search"
+          placeholder="Buscar vehículo..."
+          class="search-input px-3 py-2 bg-white text-gray-900 text-sm rounded outline-none focus:ring-2 focus:ring-[#8ecdb7] focus:border-transparent"
+          data-input="search"
+        />
+        <button
+          class="search-submit bg-[#214a3c] hover:bg-[#1a3a2f] text-white rounded px-3 py-2 text-sm font-medium transition-colors"
+          data-action="search-submit"
+        >
+          Buscar
+        </button>
+      </div>
+    `;
+  }
+
+  /**
    * Renderiza el botón de búsqueda
    */
   _renderSearchButton() {
@@ -247,9 +270,49 @@ export class Header {
       });
     });
     
-    // Event listener para botón de búsqueda
+    // Event listeners para búsqueda
     const searchBtn = header.querySelector('[data-action="search"]');
-    searchBtn?.addEventListener('click', () => this._handleSearch());
+    const searchContainer = header.querySelector('.search-container');
+    const searchInput = header.querySelector('[data-input="search"]');
+    const searchSubmitBtn = header.querySelector('[data-action="search-submit"]');
+    
+    if (searchBtn && searchContainer) {
+      // Toggle del contenedor al hacer click en el botón de búsqueda
+      searchBtn.addEventListener('click', () => {
+        searchContainer.classList.toggle('hidden');
+        
+        // Si se muestra, enfocar el input
+        if (!searchContainer.classList.contains('hidden')) {
+          searchInput.focus();
+        }
+      });
+    }
+    
+    if (searchInput) {
+      // Buscar al presionar Enter en el input
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          this._handleSearch(searchInput.value);
+          if (searchContainer) searchContainer.classList.add('hidden');
+        }
+      });
+      
+      // Cerrar al presionar Escape
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (searchContainer) searchContainer.classList.add('hidden');
+          searchInput.value = '';
+        }
+      });
+    }
+    
+    if (searchSubmitBtn) {
+      // Click en botón de búsqueda dentro del contenedor
+      searchSubmitBtn.addEventListener('click', () => {
+        this._handleSearch(searchInput.value);
+        if (searchContainer) searchContainer.classList.add('hidden');
+      });
+    }
     
     // Event listener para botón de auth
     const authBtn = header.querySelector('[data-action="auth"]');
@@ -275,11 +338,25 @@ export class Header {
   }
   
   /**
-   * Maneja el click en búsqueda
+   * Maneja la búsqueda
+   * 📝 NOTA: Emite un evento personalizado que HomeView puede escuchar
    */
-  _handleSearch() {
-    console.log('🔍 Búsqueda activada');
-    // 📝 TODO: Implementar modal o página de búsqueda
+  _handleSearch(query = '') {
+    if (!query.trim()) {
+      console.log('⚠️ Búsqueda vacía');
+      return;
+    }
+    
+    console.log(`� Búsqueda: "${query}"`);
+    
+    // Emitir evento personalizado que HomeView puede escuchar
+    const searchEvent = new CustomEvent('search', {
+      detail: { query: query.toLowerCase() },
+      bubbles: true,
+      cancelable: true
+    });
+    
+    document.dispatchEvent(searchEvent);
   }
   
   /**

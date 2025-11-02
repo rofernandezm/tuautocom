@@ -37,6 +37,639 @@
 
 ---
 
+## 🧠 METODOLOGÍA DE RAZONAMIENTO Y TRABAJO
+
+> **Objetivo**: Esta sección documenta el proceso de razonamiento sistemático que debe seguir cualquier LLM (GPT-4, Grok, Claude, etc.) para mantener consistencia y calidad en el desarrollo.
+
+### 🎯 Principios Fundamentales
+
+#### 1. **Razonamiento Antes de Acción**
+```
+❌ MAL:  Recibir tarea → Escribir código inmediatamente
+✅ BIEN: Recibir tarea → Analizar → Planificar → Validar → Implementar
+```
+
+**Proceso mental obligatorio:**
+1. **Entender completamente** la tarea antes de tocar código
+2. **Identificar archivos afectados** y sus interdependencias
+3. **Revisar patrones existentes** en el proyecto
+4. **Planificar cambios** paso a paso
+5. **Validar contra estándares** documentados
+6. **Implementar de forma incremental**
+7. **Verificar resultado** con herramientas disponibles
+
+#### 2. **Contexto es Rey**
+```
+Antes de CUALQUIER acción:
+1. Leer AGENT.md (patrones y estándares)
+2. Leer CONTEXT.md (estado actual)
+3. Leer última sesión en sessions/ (decisiones recientes)
+4. Leer archivos relevantes del proyecto
+5. SOLO ENTONCES empezar a implementar
+```
+
+**⚠️ NUNCA asumir**: Si no tienes información clara, usa herramientas para leer archivos antes de hacer cambios.
+
+#### 3. **Incremental > Big Bang**
+```
+❌ MAL:  Cambiar 5 archivos a la vez sin validar
+✅ BIEN: Cambiar 1 archivo → Build → Verificar → Siguiente archivo
+```
+
+**Flujo de trabajo incremental:**
+- Un cambio conceptual a la vez
+- Compilar después de cada cambio significativo
+- Verificar que el código se sirve correctamente
+- Solo entonces continuar con el siguiente cambio
+
+#### 4. **Explicar el "Por Qué"**
+```
+❌ MAL:  "He cambiado X a Y"
+✅ BIEN: "He cambiado X a Y porque [razón], esto resuelve [problema], 
+         siguiendo el patrón [estándar del proyecto]"
+```
+
+**Comunicación efectiva:**
+- Explicar la razón detrás de cada decisión
+- Referenciar patrones/estándares aplicados
+- Documentar alternativas consideradas
+- Indicar impacto del cambio
+
+---
+
+### 🔍 PROCESO PASO A PASO PARA CUALQUIER TAREA
+
+#### **Fase 1: ANÁLISIS (No tocar código aún)**
+
+**Checklist obligatorio:**
+- [ ] ¿Entiendo completamente lo que el usuario pide?
+- [ ] ¿He leído AGENT.md para conocer los patrones?
+- [ ] ¿He leído CONTEXT.md para conocer el estado?
+- [ ] ¿He leído la última sesión para contexto reciente?
+- [ ] ¿Qué archivos necesito modificar?
+- [ ] ¿Existen patrones similares en el proyecto?
+- [ ] ¿Hay dependencias entre cambios?
+
+**Herramientas a usar:**
+```javascript
+// Para entender estructura
+list_dir()           // Explorar directorios
+file_search()        // Buscar archivos por nombre
+grep_search()        // Buscar contenido en archivos
+semantic_search()    // Búsqueda conceptual
+
+// Para leer contexto
+read_file()          // Leer archivos relevantes
+```
+
+**Output esperado:** Plan mental claro ANTES de escribir código.
+
+---
+
+#### **Fase 2: PLANIFICACIÓN**
+
+**Crear plan de acción:**
+```markdown
+## Plan de Implementación
+
+### Objetivo
+[Descripción clara de lo que se busca lograr]
+
+### Archivos a Modificar
+1. `path/to/file1.js` - [razón del cambio]
+2. `path/to/file2.css` - [razón del cambio]
+
+### Cambios Específicos
+1. En file1.js:
+   - Cambiar X por Y
+   - Agregar función Z
+   - Razón: [explicación]
+
+2. En file2.css:
+   - Actualizar clase W
+   - Razón: [explicación]
+
+### Orden de Ejecución
+1. Primero: [cambio crítico]
+2. Segundo: [cambio dependiente]
+3. Tercero: [validación]
+
+### Validación
+- [ ] Build sin errores
+- [ ] Código servido correctamente
+- [ ] Comportamiento esperado verificado
+```
+
+**Para tareas complejas:** Usar `manage_todo_list` para trackear progreso.
+
+---
+
+#### **Fase 3: IMPLEMENTACIÓN INCREMENTAL**
+
+**Flujo obligatorio:**
+```
+PARA CADA cambio:
+  1. Leer archivo completo (read_file)
+  2. Identificar sección exacta a modificar
+  3. Usar replace_string_in_file con contexto suficiente
+  4. Ejecutar build (run_in_terminal)
+  5. Verificar resultado (curl/grep según corresponda)
+  6. Si hay error → corregir antes de continuar
+  7. Si está bien → siguiente cambio
+```
+
+**Reglas de replace_string_in_file:**
+```javascript
+// ❌ MAL: Contexto insuficiente (puede fallar)
+oldString: "const x = 1;"
+newString: "const x = 2;"
+
+// ✅ BIEN: 3-5 líneas antes y después (único match)
+oldString: `
+  function foo() {
+    console.log('context');
+    const x = 1;
+    return x + 5;
+  }
+`
+newString: `
+  function foo() {
+    console.log('context');
+    const x = 2;
+    return x + 5;
+  }
+`
+```
+
+**Después de cada cambio:**
+```bash
+# 1. Build (si hay CSS/SASS/Tailwind)
+pnpm build
+
+# 2. Verificar código servido
+curl -s http://localhost:8000/path/to/file.js | grep "string-to-verify"
+
+# 3. Solo entonces marcar como completo
+```
+
+---
+
+#### **Fase 4: VALIDACIÓN**
+
+**Checklist post-implementación:**
+- [ ] Build ejecutado sin errores
+- [ ] Código servido correctamente (verificado con curl)
+- [ ] Archivos modificados siguen patrones del proyecto
+- [ ] Nombres de variables/clases consistentes
+- [ ] Imports tienen extensión `.js`
+- [ ] Tailwind classes correctas (si aplica)
+- [ ] Sin console.logs de debug
+- [ ] Comentarios JSDoc actualizados
+
+**Herramientas de verificación:**
+```bash
+# Build
+run_in_terminal("cd project && pnpm build")
+
+# Verificar código servido
+run_in_terminal("curl -s http://localhost:8000/file.js | head -50")
+
+# Buscar errores
+get_errors()
+```
+
+---
+
+#### **Fase 5: DOCUMENTACIÓN Y RESUMEN**
+
+**Al finalizar cada tarea:**
+```markdown
+## ✅ [Título de la Tarea]
+
+### 🎯 Cambios Realizados
+1. **Archivo X**: [descripción del cambio]
+   - Razón: [por qué]
+   - Patrón aplicado: [cuál]
+
+2. **Archivo Y**: [descripción del cambio]
+   - Razón: [por qué]
+   - Impacto: [qué afecta]
+
+### 📊 Comparación Antes/Después
+**Antes:**
+```javascript
+// código anterior
+```
+
+**Ahora:**
+```javascript
+// código nuevo
+```
+
+### ✅ Validación
+- ✓ Build exitoso: [output]
+- ✓ Código servido: [verificación]
+- ✓ Comportamiento: [descripción]
+
+### 📝 Notas
+- [Cualquier consideración importante]
+- [Próximos pasos sugeridos]
+```
+
+---
+
+### 🎓 PATRONES DE RAZONAMIENTO ESPECÍFICOS
+
+#### **Patrón 1: Modificar Componente Existente**
+
+```
+1. READ: Leer componente completo
+2. UNDERSTAND: Identificar patrón usado (class, render(), etc.)
+3. LOCATE: Encontrar sección exacta a modificar
+4. CONTEXT: Leer 10-20 líneas alrededor
+5. PLAN: Definir cambio específico
+6. IMPLEMENT: replace_string_in_file con contexto
+7. BUILD: pnpm build
+8. VERIFY: curl + grep para validar
+9. DOCUMENT: Explicar cambio
+```
+
+**Ejemplo real:**
+```javascript
+// Tarea: Cambiar botones de redondos a rectangulares
+
+// 1. READ
+read_file("VehicleCarousel.js", 1, 150)
+
+// 2. UNDERSTAND
+// - Patrón: Clase con render()
+// - Botones creados en líneas 45-65
+// - Usan Tailwind classes
+
+// 3. LOCATE
+// - prev button: línea 47
+// - next button: línea 59
+
+// 4. CONTEXT
+read_file("VehicleCarousel.js", 40, 70)
+
+// 5. PLAN
+// Cambiar: w-12 h-12 rounded-full → w-10 h-20 rounded-lg
+
+// 6. IMPLEMENT
+replace_string_in_file({
+  oldString: "// 5 líneas antes\nw-12 h-12 rounded-full\n// 5 líneas después",
+  newString: "// 5 líneas antes\nw-10 h-20 rounded-lg\n// 5 líneas después"
+})
+
+// 7-9. BUILD, VERIFY, DOCUMENT
+```
+
+---
+
+#### **Patrón 2: Agregar Nuevo Componente**
+
+```
+1. RESEARCH: Buscar componentes similares existentes
+2. PATTERN: Identificar patrón común (clase, exports, etc.)
+3. STRUCTURE: Definir estructura del nuevo componente
+4. VALIDATE: Confirmar con usuario si es necesario
+5. CREATE: create_file() con código completo
+6. INTEGRATE: Importar donde se necesite
+7. BUILD: Compilar
+8. TEST: Verificar en navegador
+9. DOCUMENT: Actualizar CONTEXT.md
+```
+
+**Ejemplo real:**
+```javascript
+// Tarea: Crear SearchBar component
+
+// 1. RESEARCH
+grep_search("export class", "js/components/")
+// Encontrar: Header.js, VehicleCard.js, Footer.js
+
+// 2. PATTERN
+read_file("js/components/Header.js", 1, 50)
+// Identificar: class + constructor + render() + _private methods
+
+// 3. STRUCTURE
+/*
+export class SearchBar {
+  constructor(options) { }
+  render() { return HTMLElement }
+  _attachEventListeners(el) { }
+}
+*/
+
+// 4. VALIDATE (si hay duda)
+// "¿El SearchBar debe emitir eventos CustomEvent o usar callbacks?"
+
+// 5. CREATE
+create_file("js/components/SearchBar.js", contenido)
+
+// 6-9. INTEGRATE, BUILD, TEST, DOCUMENT
+```
+
+---
+
+#### **Patrón 3: Integrar con Backend (Futuro)**
+
+```
+1. ENDPOINT: Documentar endpoint de API
+2. SERVICE: Crear/actualizar servicio
+3. ERROR: Implementar manejo de errores
+4. LOADING: Agregar estados de carga
+5. DATA: Validar estructura de datos
+6. UI: Actualizar componente/vista
+7. TEST: Probar con datos reales
+8. FALLBACK: Implementar fallbacks
+```
+
+---
+
+#### **Patrón 4: Modificar Estilos (Tailwind/SASS)**
+
+```
+1. IDENTIFY: ¿Es Tailwind utility o custom CSS?
+
+   SI Tailwind:
+     - Modificar clases en componente JS
+     - Build Tailwind
+   
+   SI Custom CSS:
+     - ¿Está en input.scss o theme.js?
+     - Modificar archivo source
+     - Build SASS → Tailwind
+   
+   SI Colores:
+     - SOLO modificar theme.js
+     - Build automáticamente actualiza todo
+
+2. BUILD: pnpm build
+3. VERIFY: Revisar output.css generado
+4. TEST: Verificar en navegador
+```
+
+---
+
+### 🚨 ERRORES COMUNES A EVITAR
+
+#### ❌ Error 1: Asumir sin Verificar
+```javascript
+// MAL
+"Voy a cambiar X porque probablemente está en Y"
+
+// BIEN
+read_file("Y")  // Primero verificar
+// "He confirmado que X está en Y línea Z, procedo a cambiar"
+```
+
+#### ❌ Error 2: Cambios sin Contexto
+```javascript
+// MAL
+replace_string_in_file({
+  oldString: "color: red;",  // Puede haber múltiples matches
+  newString: "color: blue;"
+})
+
+// BIEN
+replace_string_in_file({
+  oldString: `
+    .button {
+      background: white;
+      color: red;    // Este específico
+      border: 1px solid;
+    }
+  `,
+  newString: `
+    .button {
+      background: white;
+      color: blue;   // Cambio específico
+      border: 1px solid;
+    }
+  `
+})
+```
+
+#### ❌ Error 3: No Validar Después de Cambios
+```javascript
+// MAL
+replace_string_in_file(...)
+// Continuar inmediatamente sin verificar
+
+// BIEN
+replace_string_in_file(...)
+run_in_terminal("pnpm build")
+// Verificar output del build
+run_in_terminal("curl -s http://localhost/file.js | grep 'new-code'")
+// Confirmar que el cambio se aplicó
+```
+
+#### ❌ Error 4: Imports sin .js
+```javascript
+// MAL
+import { Header } from './components/Header';
+
+// BIEN
+import { Header } from './components/Header.js';
+// ES Modules en navegador REQUIEREN extensión
+```
+
+#### ❌ Error 5: Modificar Archivos Generados
+```javascript
+// MAL
+replace_string_in_file("styles/output.css", ...)  // ❌ Generado
+replace_string_in_file("styles/temp.css", ...)     // ❌ Generado
+
+// BIEN
+replace_string_in_file("styles/input.scss", ...)   // ✅ Source
+replace_string_in_file("js/config/theme.js", ...)  // ✅ Source
+run_in_terminal("pnpm build")  // Regenerar archivos
+```
+
+---
+
+### 📚 HEURÍSTICAS DE DECISIÓN
+
+#### Cuándo Usar Cada Herramienta
+
+```javascript
+// EXPLORAR estructura
+list_dir("/path")              // Ver qué hay en un directorio
+file_search("*.js")            // Buscar archivos por patrón
+
+// BUSCAR código/texto
+grep_search("class.*extends", true)  // Regex, exacto
+semantic_search("vehicle card component")  // Conceptual
+
+// LEER contenido
+read_file("file.js", 1, 100)   // Leer sección específica
+// Siempre leer ANTES de modificar
+
+// MODIFICAR
+replace_string_in_file()       // Único replace con contexto
+// NUNCA modificar sin leer primero
+
+// CREAR
+create_file()                  // Nuevos archivos
+// Seguir patrones existentes
+
+// VALIDAR
+run_in_terminal("pnpm build") // Compilar
+get_errors()                   // Ver errores del editor
+run_in_terminal("curl...")    // Verificar código servido
+
+// ORGANIZAR (tareas complejas)
+manage_todo_list("write", todos)  // Crear plan
+manage_todo_list("read")          // Ver progreso
+```
+
+---
+
+### 🎯 CHECKLIST UNIVERSAL PARA CUALQUIER TAREA
+
+**Antes de empezar:**
+- [ ] He leído AGENT.md, CONTEXT.md, última sesión
+- [ ] Entiendo completamente la tarea
+- [ ] Tengo plan claro de qué archivos modificar
+- [ ] He identificado patrones existentes a seguir
+
+**Durante implementación:**
+- [ ] Leo archivo completo antes de modificar
+- [ ] Uso replace con 3-5 líneas de contexto
+- [ ] Build después de cada cambio significativo
+- [ ] Verifico código servido (curl/grep)
+- [ ] Corrijo errores antes de continuar
+
+**Después de implementar:**
+- [ ] Build final sin errores
+- [ ] Código sigue patrones del proyecto
+- [ ] Imports tienen .js
+- [ ] Sin console.logs de debug
+- [ ] Documenté cambios con claridad
+- [ ] Resumen visual/comparativo creado
+
+---
+
+### 💡 TIPS PARA MODELOS NO-PREMIUM
+
+#### GPT-4o-mini, Grok Fast, GPT-4.1, etc.
+
+**1. Más Deliberación, Menos Velocidad**
+```
+❌ Responder rápido con suposiciones
+✅ Tomarse tiempo para leer y entender
+```
+
+**2. Dividir Tareas Grandes**
+```
+Tarea: "Implementar carrusel completo"
+
+❌ Intentar hacer todo de una vez
+✅ Dividir:
+   1. Crear componente básico
+   2. Agregar navegación
+   3. Agregar drag-scroll
+   4. Styling final
+   5. Integrar en vista
+```
+
+**3. Usar Herramientas Agresivamente**
+```
+❌ "Creo que el archivo es así..."
+✅ read_file() para confirmar
+✅ grep_search() para buscar
+✅ semantic_search() para explorar
+```
+
+**4. Validar Constantemente**
+```
+Después de CADA cambio:
+1. pnpm build
+2. Verificar output
+3. Solo entonces continuar
+```
+
+**5. Documentar el Razonamiento**
+```
+Explicar paso a paso:
+- "Primero leo X para entender Y"
+- "Identifico que el patrón es Z"
+- "Por lo tanto, modifico W de esta forma"
+- "Esto sigue el estándar A documentado en AGENT.md"
+```
+
+**6. No Adivinar, Confirmar**
+```
+❌ "Probablemente necesitas..."
+✅ "He analizado X y Y, confirmo que necesitas..."
+```
+
+**7. Aprovechar el Contexto Acumulado**
+```
+Referirse a:
+- Decisiones anteriores en sesiones
+- Patrones ya establecidos
+- Código similar exitoso
+```
+
+---
+
+### 🔄 TEMPLATE DE RESPUESTA ESTRUCTURADA
+
+**Para cualquier tarea, seguir este formato:**
+
+```markdown
+## 🎯 Análisis de la Tarea
+
+**Entendimiento:**
+[Reformular lo que el usuario pidió para confirmar comprensión]
+
+**Archivos involucrados:**
+- file1.js - [qué cambiar y por qué]
+- file2.css - [qué cambiar y por qué]
+
+**Patrón a seguir:**
+[Referencia al patrón en AGENT.md]
+
+---
+
+## 📋 Plan de Implementación
+
+1. [Paso específico con herramienta a usar]
+2. [Paso específico con herramienta a usar]
+3. [Validación]
+
+---
+
+## 🔧 Implementación
+
+[Ejecutar tools con explicación]
+
+---
+
+## ✅ Resultado
+
+**Cambios realizados:**
+- [Lista específica]
+
+**Validación:**
+- ✓ Build: [output]
+- ✓ Verificación: [método usado]
+
+**Comparación:**
+[Antes vs Ahora visual]
+
+---
+
+## 📝 Próximos Pasos
+
+[Sugerencias si aplican]
+```
+
+---
+
 ## 📋 INFORMACIÓN DEL PROYECTO
 
 ### Descripción

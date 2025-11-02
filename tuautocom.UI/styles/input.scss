@@ -39,3 +39,17 @@
 */
 
 /* Los estilos custom específicos van aquí */
+
+/* Ocultar scrollbar en carrusel (mantener funcionalidad) */
+.carousel-list {
+  /* Firefox */
+  scrollbar-width: none;
+  
+  /* IE/Edge */
+  -ms-overflow-style: none;
+  
+  /* Chrome/Safari/Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

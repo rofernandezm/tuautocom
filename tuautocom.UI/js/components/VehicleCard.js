@@ -87,8 +87,12 @@ export class VehicleCard {
     // Aún no está visible en la página hasta que se agregue al DOM
     const card = document.createElement('div');
     
-    // 2. Aplicar clases de Tailwind (copiadas del diseño de Stitch)
-    card.className = 'flex h-full flex-1 flex-col gap-4 rounded-lg min-w-60';
+    // 2. Aplicar clases de Tailwind para tamaño FIJO
+    // w-60 = ancho 15rem (240px) - CONSISTENTE en todas las cards
+    // h-80 = alto 20rem (320px) - CONSISTENTE en todas las cards
+    // flex-col = column layout
+    // gap-4 = espaciado entre imagen y info
+    card.className = 'flex flex-col gap-4 rounded-lg w-60 h-80';
     
     // 3. Agregar atributo data para identificación
     // 📝 NOTA EDUCATIVA:
@@ -128,15 +132,17 @@ export class VehicleCard {
    */
   _renderImage() {
     // 📝 NOTA EDUCATIVA:
-    // aspect-video = proporción 16:9 (típica de videos)
-    // bg-cover = la imagen cubre todo el espacio
+    // h-48 = altura fija (12rem = 192px)
+    // w-full = ancho 100% del contenedor (que tiene w-60 fijo)
+    // bg-cover = la imagen cubre todo el espacio sin deformarse
     // bg-center = la imagen se centra
-    // bg-no-repeat = no se repite la imagen
+    // 
+    // RESULTADO: imagen de tamaño consistente
     
     return `
       <div 
-        class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg"
-        style="background-image: url('${this.data.image}')"
+        class="w-full h-48 bg-center bg-no-repeat bg-cover rounded-lg"
+        style="background-image: url('${this.data.image}'); background-size: cover; background-position: center;"
         role="img"
         aria-label="${this.data.title}"
       >

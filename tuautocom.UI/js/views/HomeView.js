@@ -9,37 +9,36 @@ import { HeroSection } from '../components/HeroSection.js';
 import { CategoryFilters } from '../components/CategoryFilters.js';
 import { VehicleCard } from '../components/VehicleCard.js';
 import { Footer } from '../components/Footer.js';
+import { VehicleCarousel } from '../components/VehicleCarousel.js';
+import { vehicleService } from '../services/vehicleService.js';
 
 export class HomeView {
   constructor() {
     this.container = null;
     this.categories = [];
-    this.vehicles = [];
+    this.featuredVehicles = [];
+    this.cheapestVehicles = [];
+    this.mostVisitedVehicles = [];
   }
 
   /**
-   * init - carga datos necesarios para la vista (puede ser async)
-   * En esta fase usamos datos mock para demo; en integración con backend
-   * se reemplazará por llamadas a servicios.
+   * init - carga datos necesarios para la vista desde vehicleService
+   * En esta fase usamos datos mock; en integración con backend
+   * se reemplazará por llamadas a servicios reales.
    */
   async init() {
-    // Datos mock (temporal)
-    this.categories = [
-      { id: 'all', label: 'Todos' },
-      { id: 'sedan', label: 'Sedán' },
-      { id: 'suv', label: 'SUV' },
-      { id: 'pickup', label: 'Pick-up' },
-      { id: 'electric', label: 'Eléctricos' }
-    ];
-
-    this.vehicles = [
-      { id: 'v1', image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop', title: 'Toyota Camry 2024', description: 'Sedán ejecutivo con tecnología híbrida avanzada', badge: { text: 'Popular' } },
-      { id: 'v2', image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=300&fit=crop', title: 'Ford Explorer 2024', description: 'SUV espacioso ideal para familias', badge: { text: 'Nuevo' } },
-      { id: 'v3', image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&h=300&fit=crop', title: 'Tesla Model 3', description: 'Sedán eléctrico con autopilot incluido', badge: { text: 'Eléctrico' } },
-      { id: 'v4', image: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=400&h=300&fit=crop', title: 'Honda CR-V 2024', description: 'SUV compacto con excelente economía de combustible' }
-    ];
-
-    // Aquí podríamos await vehicleService.getFeatured() en el futuro
+    try {
+      this.categories = await vehicleService.getCategories();
+      this.featuredVehicles = await vehicleService.getFeatured();
+      this.cheapestVehicles = await vehicleService.getCheapest();
+      this.mostVisitedVehicles = await vehicleService.getMostVisited();
+    } catch (error) {
+      console.error('Error loading HomeView data:', error);
+      this.categories = [];
+      this.featuredVehicles = [];
+      this.cheapestVehicles = [];
+      this.mostVisitedVehicles = [];
+    }
   }
 
   /**
@@ -66,14 +65,50 @@ export class HomeView {
     const filters = new CategoryFilters({ categories: this.categories, activeCategory: 'all', onChange: (id) => console.log('Filtro:', id) });
     main.appendChild(filters.render());
 
-    // Vehicles grid
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8';
-    this.vehicles.forEach(v => {
-      const card = new VehicleCard({ ...v, onClick: (data) => alert(`Seleccionaste: ${data.title}`) });
-      grid.appendChild(card.render());
-    });
-    main.appendChild(grid);
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Sección 1: Más vistos (carrusel)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (this.featuredVehicles.length > 0) {
+      const featuredSection = document.createElement('section');
+      featuredSection.className = 'my-6';
+      const featuredTitle = document.createElement('h3');
+      featuredTitle.className = 'text-xl font-bold mb-3';
+      featuredTitle.textContent = 'Más vistos';
+      featuredSection.appendChild(featuredTitle);
+      const featuredCarousel = new VehicleCarousel({ items: this.featuredVehicles });
+      featuredSection.appendChild(featuredCarousel.render());
+      main.appendChild(featuredSection);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Sección 2: Más baratos (carrusel)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (this.cheapestVehicles.length > 0) {
+      const cheapestSection = document.createElement('section');
+      cheapestSection.className = 'my-6';
+      const cheapestTitle = document.createElement('h3');
+      cheapestTitle.className = 'text-xl font-bold mb-3';
+      cheapestTitle.textContent = 'Más baratos';
+      cheapestSection.appendChild(cheapestTitle);
+      const cheapestCarousel = new VehicleCarousel({ items: this.cheapestVehicles });
+      cheapestSection.appendChild(cheapestCarousel.render());
+      main.appendChild(cheapestSection);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Sección 3: Más visitados (carrusel)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (this.mostVisitedVehicles.length > 0) {
+      const visitedSection = document.createElement('section');
+      visitedSection.className = 'my-6';
+      const visitedTitle = document.createElement('h3');
+      visitedTitle.className = 'text-xl font-bold mb-3';
+      visitedTitle.textContent = 'Más visitados';
+      visitedSection.appendChild(visitedTitle);
+      const visitedCarousel = new VehicleCarousel({ items: this.mostVisitedVehicles });
+      visitedSection.appendChild(visitedCarousel.render());
+      main.appendChild(visitedSection);
+    }
 
     this.container.appendChild(main);
 
