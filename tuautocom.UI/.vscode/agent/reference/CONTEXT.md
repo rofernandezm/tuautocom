@@ -98,9 +98,18 @@ tuautocom.UI/
 
 Este repositorio requiere que cualquier modelo LLM que participe en la edición o proposición de cambios:
 
-- Lea `AGENT.md` para conocer patrones y estándares.
-- Lea `LLM-GUIDELINES.md` para entender la metodología de razonamiento y verificación.
-- Lea `CONTEXT.md` para conocer el estado actual del proyecto.
+- Lea `INDEX.md` para navegación completa de la documentación
+- Lea `core/AGENT.md` (índice maestro) para conocer la estructura
+- Lea `core/CRITICAL-RULES.md` (**OBLIGATORIO**) - Límites de líneas y reglas críticas
+- Lea los módulos específicos según la tarea:
+  - `guides/methodology.md` (~640L) - Metodología de razonamiento
+  - `guides/architecture.md` (~630L) - Patrones y arquitectura técnica
+  - `guides/workflows.md` (~560L) - Flujos de trabajo y troubleshooting
+  - `guides/llm-guidelines.md` (~740L) - Guidelines para LLMs
+- Lea `reference/CONTEXT.md` (este archivo) para conocer el estado actual del proyecto
+- Lea `sessions/[última]` para decisiones recientes
+
+**Nota**: La documentación está organizada en estructura de directorios (core/, guides/, reference/, sessions/) con módulos <700 líneas para facilitar la lectura por modelos LLM con límite de contexto.
 
 El modelo debe confirmar en español que realizó estas lecturas antes de proceder con cualquier cambio. Si el modelo no tiene acceso a los archivos locales, debe solicitar la información al usuario.
 
@@ -145,12 +154,24 @@ El modelo debe confirmar en español que realizó estas lecturas antes de proced
 ## �📚 Recursos
 
 ### Documentación
-- **AGENT.md**: Instrucciones completas para agentes de IA, patrones de código
-- **CONTEXT.md**: Este archivo - Contexto del proyecto
+- **INDEX.md**: Índice maestro de navegación de toda la documentación
+- **core/**:
+  - **AGENT.md**: Índice de instrucciones para agentes de IA
+  - **CRITICAL-RULES.md**: Reglas obligatorias y límites de archivos
+- **guides/**:
+  - **methodology.md**: Metodología de razonamiento y trabajo (~640L)
+  - **architecture.md**: Arquitectura y patrones técnicos (~630L)
+  - **workflows.md**: Flujos de trabajo prácticos (~560L)
+  - **llm-guidelines.md**: Guías específicas para modelos LLM (~740L)
+- **reference/**:
+  - **CONTEXT.md**: Este archivo - Contexto del proyecto
+  - **LEARNING.md**: Recursos educativos
 - **sessions/**: Historial detallado de sesiones de desarrollo
   - `2025-10-18-setup-inicial.md` - Sesión #001: Configuración inicial ✅
-  - `2025-10-21-documentacion-global.md` - Sesión #003: copilot-instructions.md ✅
+  - `2025-10-18-implementacion-header.md` - Sesión #002: Header component ✅
   - `2025-11-01-componentes-core.md` - Sesión #004: VehicleCard, Hero, Filters, Footer ✅
+  - `2025-11-02-fraccionamiento-documentacion.md` - Sesión #005: Fraccionamiento docs ✅
+  - `2025-11-02-reorganizacion-estructura.md` - Sesión #006: Reorganización directorios ✅
 
 ### Diseños
 - `designs/` directory - Diseños raw de Stitch
@@ -160,9 +181,12 @@ El modelo debe confirmar en español que realizó estas lecturas antes de proced
 - `test-all-components.html` - Test completo de todos los componentes integrados
 
 ### Para Recuperar Contexto
-1. Leer archivo de sesión más reciente en `sessions/`
-2. Consultar `AGENT.md` para patrones y estándares
-3. Revisar `CONTEXT.md` para estado actual
+1. Leer `INDEX.md` para navegación completa
+2. Leer archivo de sesión más reciente en `sessions/`
+3. Consultar `core/AGENT.md` (índice maestro) para estructura de documentación
+4. Leer `core/CRITICAL-RULES.md` para reglas obligatorias
+5. Leer módulo específico relevante (guides/methodology, architecture, workflows)
+6. Revisar `reference/CONTEXT.md` (este archivo) para estado actual
 
 ---
-**Última actualización**: 2025-11-01
+**Última actualización**: 2025-11-02 (Reorganización en estructura de directorios)
