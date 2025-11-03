@@ -14,6 +14,7 @@
 // Importamos las vistas disponibles
 import { HomeView } from './views/HomeView.js';
 import { CatalogView } from './views/CatalogView.js';
+import { CategoriesView } from './views/CategoriesView.js';
 import { VehicleDetailView } from './views/VehicleDetailView.js';
 import { AdminVehicleFormView } from './views/AdminVehicleFormView.js';
 
@@ -69,6 +70,14 @@ async function navigateTo(route) {
       await currentView.init();
       appContainer.appendChild(currentView.render());
       console.log('✅ CatalogView montada correctamente');
+      break;
+      
+    case 'categories':
+      console.log('📂 Cargando CategoriesView...');
+      currentView = new CategoriesView();
+      await currentView.init();
+      appContainer.appendChild(currentView.render());
+      console.log('✅ CategoriesView montada correctamente');
       break;
       
     case 'vehicle':

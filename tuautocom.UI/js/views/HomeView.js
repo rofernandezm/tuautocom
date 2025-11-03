@@ -6,7 +6,6 @@
 
 import { Header } from '../components/Header.js';
 import { HeroSection } from '../components/HeroSection.js';
-import { CategoryFilters } from '../components/CategoryFilters.js';
 import { VehicleCard } from '../components/VehicleCard.js';
 import { Footer } from '../components/Footer.js';
 import { VehicleCarousel } from '../components/VehicleCarousel.js';
@@ -15,17 +14,12 @@ import { vehicleService } from '../services/vehicleService.js';
 export class HomeView {
   constructor() {
     this.container = null;
-    this.categories = [];
     this.featuredVehicles = [];
     this.cheapestVehicles = [];
     this.mostVisitedVehicles = [];
     // Elementos y bindings para búsqueda
     this._searchResultsSection = null;
     this._onSearchInputBound = (event) => this._onSearchInput(event);
-    // Estado de filtrado
-    this._activeCategory = 'all';
-    // Referencia a los filtros para no recrearlos al cambiar categoría
-    this._filtersElement = null;
     // Contenedor para contenido dinámico (carousels/grids)
     this._contentContainer = null;
   }
@@ -37,14 +31,12 @@ export class HomeView {
    */
   async init() {
     try {
-      this.categories = await vehicleService.getCategories();
       this.featuredVehicles = await vehicleService.getFeatured();
       this.cheapestVehicles = await vehicleService.getCheapest();
       this.mostVisitedVehicles = await vehicleService.getMostVisited();
     } catch (error) {
       // Mensaje en español según AGENT.md
       console.error('Error al cargar los datos de HomeView:', error);
-      this.categories = [];
       this.featuredVehicles = [];
       this.cheapestVehicles = [];
       this.mostVisitedVehicles = [];
@@ -74,10 +66,6 @@ export class HomeView {
     // Main content container
     const main = document.createElement('div');
     main.className = 'w-full max-w-7xl mx-auto px-5 py-10';
-
-    // Category filters - guardar referencia para no recrearlos
-    this._filtersElement = new CategoryFilters({ categories: this.categories, activeCategory: this._activeCategory, onChange: (id) => this._onFilterChange(id) });
-    main.appendChild(this._filtersElement.render());
 
     // Crear contenedor para contenido dinámico (carousels/grids)
     this._contentContainer = document.createElement('div');
@@ -131,16 +119,6 @@ export class HomeView {
   }
 
   /**
-   * Maneja el cambio de categoría desde CategoryFilters
-   * @private
-   * @param {string} categoryId
-   */
-  _onFilterChange(categoryId) {
-    this._activeCategory = categoryId;
-    this._updateContent(categoryId);
-  }
-
-  /**
    * Renderiza o actualiza la sección de resultados de búsqueda
    * @private
    * @param {Array<Object>} results
@@ -183,34 +161,6 @@ export class HomeView {
       this._contentContainer.innerHTML = '';  // Limpiar contenido anterior
       this._contentContainer.appendChild(section);
       this._searchResultsSection = section;
-    }
-  }
-
-  /**
-   * Actualiza el contenido principal según la categoría seleccionada
-   * @private
-   * @param {string} categoryId
-   */
-  _updateContent(categoryId) {
-    // Verificar que exista el contenedor de contenido dinámico
-    if (!this._contentContainer) return;
-
-    // Limpiar completamente el contenedor de contenido
-    this._contentContainer.innerHTML = '';
-
-    // Si hay resultados de búsqueda, removerlos también
-    if (this._searchResultsSection) {
-      this._searchResultsSection.remove();
-      this._searchResultsSection = null;
-    }
-
-    // Renderizar contenido según categoría
-    if (categoryId === 'all') {
-      // Mostrar carousels normales
-      this._renderCarousels(this._contentContainer);
-    } else {
-      // Mostrar grid filtrado por categoría
-      this._renderFilteredGrid(this._contentContainer, categoryId);
     }
   }
 
@@ -264,57 +214,6 @@ export class HomeView {
       visitedSection.appendChild(visitedCarousel.render());
       container.appendChild(visitedSection);
     }
-  }
-
-  /**
-   * Renderiza un grid con vehículos filtrados por categoría
-   * @private
-   * @param {HTMLElement} container
-   * @param {string} categoryId
-   */
-  _renderFilteredGrid(container, categoryId) {
-    // Obtener todos los vehículos y filtrar por categoría
-    const allVehicles = [
-      ...this.featuredVehicles,
-      ...this.cheapestVehicles,
-      ...this.mostVisitedVehicles
-    ];
-
-    // Filtrar duplicados por id
-    const uniqueVehicles = allVehicles.filter((v, index, self) =>
-      index === self.findIndex(v2 => v2.id === v.id)
-    );
-
-    // Filtrar por categoría desde la propiedad 'category' del vehículo
-    const filteredVehicles = uniqueVehicles.filter(v => v.category === categoryId);
-
-    const section = document.createElement('section');
-    section.className = 'my-6 px-16';
-
-    const title = document.createElement('h3');
-    title.className = 'text-xl font-bold mb-3';
-    const categoryLabel = this.categories.find(c => c.id === categoryId)?.label || categoryId;
-    title.textContent = `Vehículos ${categoryLabel} (${filteredVehicles.length})`;
-    section.appendChild(title);
-
-    if (!filteredVehicles.length) {
-      const empty = document.createElement('p');
-      empty.className = 'text-sm text-primary-light';
-      empty.textContent = `No se encontraron vehículos en la categoría ${categoryLabel}.`;
-      section.appendChild(empty);
-    } else {
-      const grid = document.createElement('div');
-      grid.className = 'w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
-
-      filteredVehicles.forEach(v => {
-        const card = new VehicleCard(v);
-        grid.appendChild(card.render());
-      });
-
-      section.appendChild(grid);
-    }
-
-    container.appendChild(section);
   }
 
   /**

@@ -63,7 +63,7 @@ export class Header {
     this.navLinks = [
       { label: 'Inicio', route: 'home', hash: '#home' },
       { label: 'Catálogo', route: 'catalog', hash: '#catalog' },
-      { label: 'Categorías', route: 'categorias', hash: '#categorias' },
+      { label: 'Categorías', route: 'categories', hash: '#categories' },
       { label: 'Cargar vehículo', route: 'admin', hash: '#admin/vehicles/new' },
     ];
   }
