@@ -9,6 +9,7 @@
 
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
+import { ContactModal } from '../components/ContactModal.js';
 import { vehicleService } from '../services/vehicleService.js';
 
 export class VehicleDetailView {
@@ -418,10 +419,27 @@ export class VehicleDetailView {
    * Maneja la solicitud de información
    * @private
    */
+    /**
+   * Maneja el click en el botón "Solicitar más información"
+   * Abre el modal de contacto con la información del vehículo
+   * @private
+   */
   _handleRequestInfo() {
-    console.log('📧 Solicitar información para:', this.vehicle.title);
-    // TODO: En el futuro abrir modal de contacto
-    alert(`Solicitud de información para ${this.vehicle.title}\n\nEsta funcionalidad se implementará con el modal de contacto.`);
+    console.log('📧 Abriendo modal de contacto para:', this.vehicle.id);
+    
+    const modal = new ContactModal({
+      vehicle: this.vehicle,
+      onClose: () => {
+        console.log('📧 Modal cerrado');
+      },
+      onSubmit: (data) => {
+        console.log('📧 Formulario enviado:', data);
+        // TODO: En integración con backend, enviar a API
+      }
+    });
+
+    // Renderizar y agregar al body
+    document.body.appendChild(modal.render());
   }
 
   /**
