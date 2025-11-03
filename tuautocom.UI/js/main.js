@@ -14,6 +14,7 @@
 // Importamos las vistas disponibles
 import { HomeView } from './views/HomeView.js';
 import { CatalogView } from './views/CatalogView.js';
+import { VehicleDetailView } from './views/VehicleDetailView.js';
 
 // 📝 NOTA EDUCATIVA:
 // La extensión .js es REQUERIDA en ES Modules del navegador
@@ -55,13 +56,31 @@ async function navigateTo(route) {
   appContainer.innerHTML = '';
   
   // Cargar nueva vista según ruta
-  switch (route) {
+  // 📝 NOTA: Soporte para rutas con parámetros (ej: vehicle/v1)
+  const routeParts = route.split('/');
+  const basePath = routeParts[0];
+  const param = routeParts[1];
+  
+  switch (basePath) {
     case 'catalog':
       console.log('📂 Cargando CatalogView...');
       currentView = new CatalogView();
       await currentView.init();
       appContainer.appendChild(currentView.render());
       console.log('✅ CatalogView montada correctamente');
+      break;
+      
+    case 'vehicle':
+      console.log(`🚗 Cargando VehicleDetailView (ID: ${param})...`);
+      if (!param) {
+        console.error('❌ ID de vehículo no especificado');
+        window.location.hash = '#catalog';
+        return;
+      }
+      currentView = new VehicleDetailView(param);
+      await currentView.init();
+      appContainer.appendChild(currentView.render());
+      console.log('✅ VehicleDetailView montada correctamente');
       break;
       
     case 'home':

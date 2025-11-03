@@ -178,28 +178,24 @@ export class VehicleCard {
    * @param {HTMLElement} element - El elemento de la tarjeta
    */
   _attachEventListeners(element) {
-    // 📝 NOTA EDUCATIVA:
-    // addEventListener() registra una función que se ejecutará
-    // cuando ocurra el evento especificado (en este caso 'click')
+    // 📝 NOTA EDUCATIVA: Event Listeners
+    // Los event listeners nos permiten reaccionar a acciones del usuario
+    // hover, click, etc.
     
-    // Evento: Click en la tarjeta
+    // Click: Navegar a vista de detalle
     element.addEventListener('click', () => {
-      console.log('🚗 Vehículo clickeado:', this.data.title);
-      
-      // Si se pasó un callback personalizado, ejecutarlo
-      if (typeof this.data.onClick === 'function') {
-        this.data.onClick(this.data.id, this.data);
-      }
+      const vehicleId = this.data.id;
+      console.log(`🚗 Navegando a detalle del vehículo: ${vehicleId}`);
+      window.location.hash = `#vehicle/${vehicleId}`;
     });
     
-    // Evento: Hover (para efecto visual)
-    // 📝 NOTA EDUCATIVA:
-    // mouseenter/mouseleave se disparan cuando el cursor entra/sale del elemento
+    // Efecto hover: Elevar ligeramente la card
     element.addEventListener('mouseenter', () => {
-      // Agregar efecto de elevación con opacity
+      // Efecto de elevación sutil
       element.style.opacity = '0.8';
       element.style.transform = 'translateY(-4px)';
       element.style.transition = 'all 0.2s ease';
+      element.style.cursor = 'pointer';
     });
     
     element.addEventListener('mouseleave', () => {
