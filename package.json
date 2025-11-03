@@ -1,0 +1,26 @@
+{
+  "name": "tuautocom",
+  "version": "1.0.0",
+  "description": "TuAutoCom - Vehicle Catalog Platform (Monorepo)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "ui:dev": "cd tuautocom.UI && pnpm run dev:watch",
+    "ui:build": "cd tuautocom.UI && pnpm run build",
+    "ui:serve": "cd tuautocom.UI && pnpm run serve",
+    "ui:start": "cd tuautocom.UI && pnpm run start",
+    "backend:dev": "cd backend && pnpm run dev",
+    "backend:start": "cd backend && pnpm run start",
+    "frontend:serve": "cd frontend && npx http-server -p 8000",
+    "install:all": "pnpm install && cd backend && pnpm install && cd ../frontend && pnpm install && cd ../tuautocom.UI && pnpm install"
+  },
+  "keywords": [
+    "tuautocom",
+    "vehicle-catalog",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "packageManager": "pnpm@8.0.0"
+}

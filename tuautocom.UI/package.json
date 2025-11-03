@@ -12,7 +12,9 @@
     "build:tailwind": "pnpm exec tailwindcss -i ./styles/temp.css -o ./styles/output.css",
     "build": "pnpm build:sass && pnpm build:tailwind",
     "build:prod": "pnpm build:sass && pnpm exec tailwindcss -i ./styles/temp.css -o ./styles/output.css --minify",
-    "serve": "python3 -m http.server 8000"
+    "serve": "npx http-server -p 8000",
+    "start": "pnpm build && pnpm serve",
+    "dev:watch": "concurrently \"pnpm:dev:sass\" \"pnpm:dev:tailwind\" \"pnpm:serve\""
   },
   "keywords": [
     "vanilla-js",

@@ -61,10 +61,10 @@ export class Header {
     // Enlaces de navegación
     // 📝 NOTA: Esto podría venir de una configuración externa
     this.navLinks = [
-      { label: 'Inicio', route: 'inicio' },
-      { label: 'Catálogo', route: 'catalogo' },
-      { label: 'Categorías', route: 'categorias' },
-      { label: 'Cargar vehículo', route: 'cargar' },
+      { label: 'Inicio', route: 'home', hash: '#home' },
+      { label: 'Catálogo', route: 'catalog', hash: '#catalog' },
+      { label: 'Categorías', route: 'categorias', hash: '#categorias' },
+      { label: 'Cargar vehículo', route: 'cargar', hash: '#cargar' },
     ];
   }
   
@@ -180,7 +180,7 @@ export class Header {
         
         return `
           <a 
-            href="#${link.route}" 
+            href="${link.hash}" 
             class="${className}"
             data-route="${link.route}"
           >
@@ -265,15 +265,14 @@ export class Header {
    * - El operador ?. (optional chaining) evita errores si el elemento no existe
    */
   _attachEventListeners(header) {
-    // Event listener para links de navegación
-    const navLinks = header.querySelectorAll('[data-route]');
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault(); // Prevenir navegación por defecto
-        const route = e.target.dataset.route;
-        this._handleNavigation(route);
-      });
-    });
+    // 📝 NOTA EDUCATIVA: 
+    // NO prevenimos el default de los links porque usamos hash routing (#home, #catalog)
+    // El navegador cambiará el hash automáticamente y el evento hashchange se disparará
+    // en main.js, donde está nuestro router
+    
+    // Los links ya tienen href="#home", href="#catalog", etc.
+    // El navegador manejará el cambio de hash automáticamente
+    // No necesitamos event listeners aquí
     
     // Event listeners para búsqueda
     const searchBtn = header.querySelector('[data-action="search"]');

@@ -11,8 +11,9 @@
 // 1️⃣ IMPORTACIONES
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Importamos el componente Header que acabamos de crear
+// Importamos las vistas disponibles
 import { HomeView } from './views/HomeView.js';
+import { CatalogView } from './views/CatalogView.js';
 
 // 📝 NOTA EDUCATIVA:
 // La extensión .js es REQUERIDA en ES Modules del navegador
@@ -29,21 +30,67 @@ import { HomeView } from './views/HomeView.js';
  * Esta función se ejecuta cuando el DOM está completamente cargado
  * Es equivalente a $(document).ready() de jQuery
  */
-async function initApp() {
-  console.log('🚀 TuAutoCom Application Started');
+// Variable global para la vista actual
+let currentView = null;
 
+/**
+ * Navega a una ruta específica
+ * @param {string} route - Ruta a cargar (home, catalog, etc.)
+ */
+async function navigateTo(route) {
+  console.log(`� Navegando a: ${route}`);
+  
   const appContainer = document.getElementById('app');
   if (!appContainer) {
     console.error('❌ No se encontró el contenedor #app');
     return;
   }
+  
+  // Destruir vista anterior si existe
+  if (currentView && currentView.destroy) {
+    currentView.destroy();
+  }
+  
+  // Limpiar contenedor
+  appContainer.innerHTML = '';
+  
+  // Cargar nueva vista según ruta
+  switch (route) {
+    case 'catalog':
+      console.log('📂 Cargando CatalogView...');
+      currentView = new CatalogView();
+      await currentView.init();
+      appContainer.appendChild(currentView.render());
+      console.log('✅ CatalogView montada correctamente');
+      break;
+      
+    case 'home':
+    default:
+      console.log('🏠 Cargando HomeView...');
+      currentView = new HomeView();
+      await currentView.init();
+      appContainer.appendChild(currentView.render());
+      console.log('✅ HomeView montada correctamente');
+      break;
+  }
+}
 
-  // Crear y montar la HomeView
-  const homeView = new HomeView();
-  await homeView.init();
-  appContainer.appendChild(homeView.render());
+async function initApp() {
+  console.log('🚀 TuAutoCom Application Started');
 
-  console.log('✅ HomeView montada correctamente');
+  // 📝 NOTA EDUCATIVA: Routing simple basado en hash
+  // Para probar diferentes vistas, cambiar la URL:
+  // - #home o / → HomeView (default)
+  // - #catalog → CatalogView (nueva vista con filtros)
+  
+  const route = window.location.hash.slice(1) || 'home';
+  await navigateTo(route);
+  
+  // Escuchar cambios en el hash para navegación
+  window.addEventListener('hashchange', async () => {
+    const newRoute = window.location.hash.slice(1) || 'home';
+    await navigateTo(newRoute);
+  });
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
