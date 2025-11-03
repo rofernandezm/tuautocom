@@ -21,7 +21,13 @@ export class HomeView {
     this.mostVisitedVehicles = [];
     // Elementos y bindings para búsqueda
     this._searchResultsSection = null;
-    this._onSearchBound = this._onSearch.bind(this);
+    this._onSearchInputBound = (event) => this._onSearchInput(event);
+    // Estado de filtrado
+    this._activeCategory = 'all';
+    // Referencia a los filtros para no recrearlos al cambiar categoría
+    this._filtersElement = null;
+    // Contenedor para contenido dinámico (carousels/grids)
+    this._contentContainer = null;
   }
 
   /**
@@ -58,8 +64,8 @@ export class HomeView {
     this.container.appendChild(header.render());
 
     // Escuchar búsquedas emitidas por Header
-    // El Header emite un CustomEvent 'search' en document
-    document.addEventListener('search', this._onSearchBound);
+    // El Header emite un CustomEvent 'search-input' en document para búsqueda en tiempo real
+    document.addEventListener('search-input', this._onSearchInputBound);
 
     // Hero
     const hero = new HeroSection({ title: 'Encuentra tu Auto Ideal', subtitle: 'Explora nuestra selección de vehículos nuevos y seminuevos', backgroundImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=400&fit=crop' });
@@ -67,56 +73,19 @@ export class HomeView {
 
     // Main content container
     const main = document.createElement('div');
-    main.className = 'max-w-7xl mx-auto px-5 py-10';
+    main.className = 'w-full max-w-7xl mx-auto px-5 py-10';
 
-    // Category filters
-  const filters = new CategoryFilters({ categories: this.categories, activeCategory: 'all', onChange: (id) => this._onFilterChange(id) });
-    main.appendChild(filters.render());
+    // Category filters - guardar referencia para no recrearlos
+    this._filtersElement = new CategoryFilters({ categories: this.categories, activeCategory: this._activeCategory, onChange: (id) => this._onFilterChange(id) });
+    main.appendChild(this._filtersElement.render());
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Sección 1: Más vistos (carrusel)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (this.featuredVehicles.length > 0) {
-      const featuredSection = document.createElement('section');
-      featuredSection.className = 'my-6';
-      const featuredTitle = document.createElement('h3');
-      featuredTitle.className = 'text-xl font-bold mb-3';
-      featuredTitle.textContent = 'Más vistos';
-      featuredSection.appendChild(featuredTitle);
-      const featuredCarousel = new VehicleCarousel({ items: this.featuredVehicles });
-      featuredSection.appendChild(featuredCarousel.render());
-      main.appendChild(featuredSection);
-    }
+    // Crear contenedor para contenido dinámico (carousels/grids)
+    this._contentContainer = document.createElement('div');
+    this._contentContainer.className = 'w-full';
+    main.appendChild(this._contentContainer);
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Sección 2: Más baratos (carrusel)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (this.cheapestVehicles.length > 0) {
-      const cheapestSection = document.createElement('section');
-      cheapestSection.className = 'my-6';
-      const cheapestTitle = document.createElement('h3');
-      cheapestTitle.className = 'text-xl font-bold mb-3';
-      cheapestTitle.textContent = 'Más baratos';
-      cheapestSection.appendChild(cheapestTitle);
-      const cheapestCarousel = new VehicleCarousel({ items: this.cheapestVehicles });
-      cheapestSection.appendChild(cheapestCarousel.render());
-      main.appendChild(cheapestSection);
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Sección 3: Más visitados (carrusel)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (this.mostVisitedVehicles.length > 0) {
-      const visitedSection = document.createElement('section');
-      visitedSection.className = 'my-6';
-      const visitedTitle = document.createElement('h3');
-      visitedTitle.className = 'text-xl font-bold mb-3';
-      visitedTitle.textContent = 'Más visitados';
-      visitedSection.appendChild(visitedTitle);
-      const visitedCarousel = new VehicleCarousel({ items: this.mostVisitedVehicles });
-      visitedSection.appendChild(visitedCarousel.render());
-      main.appendChild(visitedSection);
-    }
+    // Renderizar carousels iniciales
+    this._renderCarousels(this._contentContainer);
 
     this.container.appendChild(main);
 
@@ -128,14 +97,22 @@ export class HomeView {
   }
 
   /**
-   * Handler del evento 'search' emitido por Header
+   * Handler del evento 'search-input' emitido por Header (búsqueda en tiempo real)
    * @private
    * @param {CustomEvent} event
    */
-  async _onSearch(event) {
+  async _onSearchInput(event) {
     try {
       const query = event?.detail?.query || '';
-      if (!query) return;
+      
+      if (!query) {
+        // Si no hay query, ocultar sección de resultados
+        if (this._searchResultsSection) {
+          this._searchResultsSection.remove();
+          this._searchResultsSection = null;
+        }
+        return;
+      }
 
       // Obtener todos los vehículos y filtrar por título/descripcion
       const all = await vehicleService.getAll();
@@ -149,7 +126,7 @@ export class HomeView {
       this._renderSearchResults(results, query);
     } catch (error) {
       // Mensaje en español según AGENT.md
-      console.error('Error al procesar la búsqueda en HomeView:', error);
+      console.error('Error al procesar la búsqueda en tiempo real en HomeView:', error);
     }
   }
 
@@ -159,10 +136,8 @@ export class HomeView {
    * @param {string} categoryId
    */
   _onFilterChange(categoryId) {
-    // 📝 NOTA EDUCATIVA: Aquí se puede implementar la lógica de filtrado
-    // por categoría y re-renderizado de la vista. Por ahora guardamos
-    // la categoría activa en el estado local para usos futuros.
     this._activeCategory = categoryId;
+    this._updateContent(categoryId);
   }
 
   /**
@@ -203,21 +178,151 @@ export class HomeView {
       section.appendChild(grid);
     }
 
-    // Insertar la sección de resultados al inicio del main (después del hero)
-    const main = this.container.querySelector('div.max-w-7xl');
-    if (main) {
-      main.insertBefore(section, main.firstChild);
+    // Insertar la sección de resultados en el contenedor de contenido dinámico
+    if (this._contentContainer) {
+      this._contentContainer.innerHTML = '';  // Limpiar contenido anterior
+      this._contentContainer.appendChild(section);
       this._searchResultsSection = section;
     }
+  }
+
+  /**
+   * Actualiza el contenido principal según la categoría seleccionada
+   * @private
+   * @param {string} categoryId
+   */
+  _updateContent(categoryId) {
+    // Verificar que exista el contenedor de contenido dinámico
+    if (!this._contentContainer) return;
+
+    // Limpiar completamente el contenedor de contenido
+    this._contentContainer.innerHTML = '';
+
+    // Si hay resultados de búsqueda, removerlos también
+    if (this._searchResultsSection) {
+      this._searchResultsSection.remove();
+      this._searchResultsSection = null;
+    }
+
+    // Renderizar contenido según categoría
+    if (categoryId === 'all') {
+      // Mostrar carousels normales
+      this._renderCarousels(this._contentContainer);
+    } else {
+      // Mostrar grid filtrado por categoría
+      this._renderFilteredGrid(this._contentContainer, categoryId);
+    }
+  }
+
+  /**
+   * Renderiza los carousels normales (featured, cheapest, mostVisited)
+   * @private
+   * @param {HTMLElement} container
+   */
+  _renderCarousels(container) {
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Sección 1: Más vistos (carrusel)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (this.featuredVehicles.length > 0) {
+      const featuredSection = document.createElement('section');
+      featuredSection.className = 'my-6';
+      const featuredTitle = document.createElement('h3');
+      featuredTitle.className = 'text-xl font-bold mb-3';
+      featuredTitle.textContent = 'Más vistos';
+      featuredSection.appendChild(featuredTitle);
+      const featuredCarousel = new VehicleCarousel({ items: this.featuredVehicles });
+      featuredSection.appendChild(featuredCarousel.render());
+      container.appendChild(featuredSection);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Sección 2: Más baratos (carrusel)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (this.cheapestVehicles.length > 0) {
+      const cheapestSection = document.createElement('section');
+      cheapestSection.className = 'my-6';
+      const cheapestTitle = document.createElement('h3');
+      cheapestTitle.className = 'text-xl font-bold mb-3';
+      cheapestTitle.textContent = 'Más baratos';
+      cheapestSection.appendChild(cheapestTitle);
+      const cheapestCarousel = new VehicleCarousel({ items: this.cheapestVehicles });
+      cheapestSection.appendChild(cheapestCarousel.render());
+      container.appendChild(cheapestSection);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Sección 3: Más visitados (carrusel)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (this.mostVisitedVehicles.length > 0) {
+      const visitedSection = document.createElement('section');
+      visitedSection.className = 'my-6';
+      const visitedTitle = document.createElement('h3');
+      visitedTitle.className = 'text-xl font-bold mb-3';
+      visitedTitle.textContent = 'Más visitados';
+      visitedSection.appendChild(visitedTitle);
+      const visitedCarousel = new VehicleCarousel({ items: this.mostVisitedVehicles });
+      visitedSection.appendChild(visitedCarousel.render());
+      container.appendChild(visitedSection);
+    }
+  }
+
+  /**
+   * Renderiza un grid con vehículos filtrados por categoría
+   * @private
+   * @param {HTMLElement} container
+   * @param {string} categoryId
+   */
+  _renderFilteredGrid(container, categoryId) {
+    // Obtener todos los vehículos y filtrar por categoría
+    const allVehicles = [
+      ...this.featuredVehicles,
+      ...this.cheapestVehicles,
+      ...this.mostVisitedVehicles
+    ];
+
+    // Filtrar duplicados por id
+    const uniqueVehicles = allVehicles.filter((v, index, self) =>
+      index === self.findIndex(v2 => v2.id === v.id)
+    );
+
+    // Filtrar por categoría desde la propiedad 'category' del vehículo
+    const filteredVehicles = uniqueVehicles.filter(v => v.category === categoryId);
+
+    const section = document.createElement('section');
+    section.className = 'my-6 px-16';
+
+    const title = document.createElement('h3');
+    title.className = 'text-xl font-bold mb-3';
+    const categoryLabel = this.categories.find(c => c.id === categoryId)?.label || categoryId;
+    title.textContent = `Vehículos ${categoryLabel} (${filteredVehicles.length})`;
+    section.appendChild(title);
+
+    if (!filteredVehicles.length) {
+      const empty = document.createElement('p');
+      empty.className = 'text-sm text-primary-light';
+      empty.textContent = `No se encontraron vehículos en la categoría ${categoryLabel}.`;
+      section.appendChild(empty);
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+
+      filteredVehicles.forEach(v => {
+        const card = new VehicleCard(v);
+        grid.appendChild(card.render());
+      });
+
+      section.appendChild(grid);
+    }
+
+    container.appendChild(section);
   }
 
   /**
    * destroy - limpiar recursos asociados a la vista
    */
   destroy() {
-    // Placeholder: remover listeners, timers, etc.
-    // Remover listener de búsqueda
-    document.removeEventListener('search', this._onSearchBound);
+    // Remover listener de búsqueda en tiempo real
+    document.removeEventListener('search-input', this._onSearchInputBound);
 
     if (this.container && this.container.remove) this.container.remove();
   }

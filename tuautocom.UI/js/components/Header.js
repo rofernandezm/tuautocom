@@ -206,23 +206,28 @@ export class Header {
   }
   
   /**
-   * Renderiza el input de búsqueda con botón (oculto por defecto)
+   * Renderiza el input de búsqueda (oculto por defecto)
    */
   _renderSearchInput() {
     return `
       <div class="search-container hidden absolute right-0 top-12 flex items-center gap-2 bg-white p-2 rounded-lg z-50 shadow-lg">
-        <input
-          type="search"
-          placeholder="Buscar vehículo..."
-          class="search-input px-3 py-2 bg-white text-gray-900 text-sm rounded outline-none focus:ring-2 focus:ring-[#8ecdb7] focus:border-transparent"
-          data-input="search"
-        />
-        <button
-          class="search-submit bg-[#214a3c] hover:bg-[#1a3a2f] text-white rounded px-3 py-2 text-sm font-medium transition-colors"
-          data-action="search-submit"
-        >
-          Buscar
-        </button>
+        <div class="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar vehículo..."
+            class="search-input w-full px-3 py-2 bg-white text-gray-900 text-sm rounded outline-none focus:ring-2 focus:ring-[#8ecdb7] focus:border-transparent pr-8"
+            data-input="search"
+          />
+          <button
+            class="search-clear absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 opacity-0 transition-opacity"
+            data-action="search-clear"
+            title="Limpiar búsqueda"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+              <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.34a8,8,0,0,1,11.32,11.32L139.31,128Z"/>
+            </svg>
+          </button>
+        </div>
       </div>
     `;
   }
@@ -274,7 +279,6 @@ export class Header {
     const searchBtn = header.querySelector('[data-action="search"]');
     const searchContainer = header.querySelector('.search-container');
     const searchInput = header.querySelector('[data-input="search"]');
-    const searchSubmitBtn = header.querySelector('[data-action="search-submit"]');
     
     if (searchBtn && searchContainer) {
       // Toggle del contenedor al hacer click en el botón de búsqueda
@@ -289,11 +293,13 @@ export class Header {
     }
     
     if (searchInput) {
-      // Buscar al presionar Enter en el input
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          this._handleSearch(searchInput.value);
-          if (searchContainer) searchContainer.classList.add('hidden');
+      // Búsqueda en tiempo real mientras se escribe
+      searchInput.addEventListener('input', (e) => {
+        this._handleSearchInput(e.target.value);
+        // Mostrar/ocultar botón de clear
+        const clearBtn = header.querySelector('[data-action="search-clear"]');
+        if (clearBtn) {
+          clearBtn.style.opacity = e.target.value ? '1' : '0';
         }
       });
       
@@ -302,15 +308,22 @@ export class Header {
         if (e.key === 'Escape') {
           if (searchContainer) searchContainer.classList.add('hidden');
           searchInput.value = '';
+          this._handleSearchInput(''); // Limpiar búsqueda
+          // Ocultar botón de clear
+          const clearBtn = header.querySelector('[data-action="search-clear"]');
+          if (clearBtn) clearBtn.style.opacity = '0';
         }
       });
     }
     
-    if (searchSubmitBtn) {
-      // Click en botón de búsqueda dentro del contenedor
-      searchSubmitBtn.addEventListener('click', () => {
-        this._handleSearch(searchInput.value);
-        if (searchContainer) searchContainer.classList.add('hidden');
+    // Botón de clear
+    const clearBtn = header.querySelector('[data-action="search-clear"]');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        this._handleSearchInput('');
+        clearBtn.style.opacity = '0';
+        searchInput.focus();
       });
     }
     
@@ -338,25 +351,18 @@ export class Header {
   }
   
   /**
-   * Maneja la búsqueda
-   * 📝 NOTA: Emite un evento personalizado que HomeView puede escuchar
+   * Maneja la búsqueda en tiempo real
+   * 📝 NOTA: Emite un evento personalizado para búsqueda en tiempo real
    */
-  _handleSearch(query = '') {
-    if (!query.trim()) {
-      console.log('⚠️ Búsqueda vacía');
-      return;
-    }
-    
-    console.log(`� Búsqueda: "${query}"`);
-    
+  _handleSearchInput(query = '') {
     // Emitir evento personalizado que HomeView puede escuchar
-    const searchEvent = new CustomEvent('search', {
+    const searchInputEvent = new CustomEvent('search-input', {
       detail: { query: query.toLowerCase() },
       bubbles: true,
       cancelable: true
     });
     
-    document.dispatchEvent(searchEvent);
+    document.dispatchEvent(searchInputEvent);
   }
   
   /**

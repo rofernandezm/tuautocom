@@ -94,6 +94,7 @@ export class CategoryFilters {
     // Contenedor principal
     const container = document.createElement('div');
     container.className = 'flex gap-3 p-3 flex-wrap pr-4';
+    container.setAttribute('data-filters', 'true');
     
     // 📝 NOTA EDUCATIVA:
     // flex-wrap permite que las pills se envuelvan a la siguiente línea
