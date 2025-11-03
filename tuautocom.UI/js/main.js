@@ -15,6 +15,7 @@
 import { HomeView } from './views/HomeView.js';
 import { CatalogView } from './views/CatalogView.js';
 import { VehicleDetailView } from './views/VehicleDetailView.js';
+import { AdminVehicleFormView } from './views/AdminVehicleFormView.js';
 
 // 📝 NOTA EDUCATIVA:
 // La extensión .js es REQUERIDA en ES Modules del navegador
@@ -81,6 +82,34 @@ async function navigateTo(route) {
       await currentView.init();
       appContainer.appendChild(currentView.render());
       console.log('✅ VehicleDetailView montada correctamente');
+      break;
+      
+    case 'admin':
+      console.log('⚙️ Cargando AdminVehicleFormView...');
+      // Soporte para admin/vehicles/new o admin/vehicles/edit/:id
+      if (param === 'vehicles') {
+        const action = routeParts[2]; // 'new' o 'edit'
+        const vehicleId = routeParts[3]; // ID si es edición
+        
+        if (action === 'new') {
+          console.log('📝 Modo: Crear nuevo vehículo');
+          currentView = new AdminVehicleFormView();
+        } else if (action === 'edit' && vehicleId) {
+          console.log(`📝 Modo: Editar vehículo (ID: ${vehicleId})`);
+          currentView = new AdminVehicleFormView(vehicleId);
+        } else {
+          console.error('❌ Ruta de administración inválida');
+          window.location.hash = '#home';
+          return;
+        }
+        
+        await currentView.init();
+        appContainer.appendChild(currentView.render());
+        console.log('✅ AdminVehicleFormView montada correctamente');
+      } else {
+        console.error('❌ Ruta de administración inválida');
+        window.location.hash = '#home';
+      }
       break;
       
     case 'home':

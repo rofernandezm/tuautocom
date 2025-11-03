@@ -64,7 +64,7 @@ export class Header {
       { label: 'Inicio', route: 'home', hash: '#home' },
       { label: 'Catálogo', route: 'catalog', hash: '#catalog' },
       { label: 'Categorías', route: 'categorias', hash: '#categorias' },
-      { label: 'Cargar vehículo', route: 'cargar', hash: '#cargar' },
+      { label: 'Cargar vehículo', route: 'admin', hash: '#admin/vehicles/new' },
     ];
   }
   
