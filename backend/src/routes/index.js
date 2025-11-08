@@ -1,6 +1,10 @@
 import { Router } from "express";
+import vehiclesRouter from './vehicles.js';
 
 const router = Router();
+
+// Ruta base de vehículos
+router.use('/vehicles', vehiclesRouter);
 
 // GET route example
 router.get('/json', (req, res) => {
