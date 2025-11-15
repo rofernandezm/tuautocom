@@ -6,14 +6,14 @@ export async function connectDB() {
   if (!uri) throw new Error('MONGO_URI no está definido en las variables de entorno');
 
   try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      // otras opciones según versión de mongoose
-    });
-    console.log('MongoDB connected:', uri);
+    // useNewUrlParser y useUnifiedTopology están deprecadas desde Mongoose 6.0+
+    // Se omiten ya que son comportamiento por defecto
+    await mongoose.connect(uri);
+    console.log('MongoDB conectado exitosamente');
+    console.log('Cluster:', config.DATABASE_URL.match(/@([^/]+)/)?.[1] || 'N/A');
+    console.log('Database:', config.DATABASE_NAME);
   } catch (err) {
-    console.error('Error conectando a MongoDB', err);
+    console.error('Error conectando a MongoDB:', err.message);
     process.exit(1);
   }
 }

@@ -9,6 +9,7 @@
 
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
+import { vehicleService } from '../services/vehicleService.js';
 
 export class AdminVehicleFormView {
   constructor(vehicleId = null) {
@@ -24,9 +25,18 @@ export class AdminVehicleFormView {
    */
   async init() {
     if (this.vehicleId) {
-      // TODO: En integración con backend, cargar vehículo
       console.log('📝 Modo edición - ID:', this.vehicleId);
-      // this.vehicle = await vehicleService.getById(this.vehicleId);
+      try {
+        this.vehicle = await vehicleService.getById(this.vehicleId);
+        if (!this.vehicle) {
+          console.error('❌ Vehículo no encontrado');
+          alert('Vehículo no encontrado');
+          window.location.hash = '#catalog';
+        }
+      } catch (error) {
+        console.error('❌ Error cargando vehículo:', error);
+        alert('Error cargando datos del vehículo');
+      }
     } else {
       console.log('📝 Modo creación - Nuevo vehículo');
     }
@@ -394,34 +404,68 @@ export class AdminVehicleFormView {
    * @private
    * @param {HTMLFormElement} form
    */
-  _handleSubmit(form) {
+  async _handleSubmit(form) {
     const formData = new FormData(form);
     
+    // Construir objeto según schema de MongoDB
     const vehicleData = {
+      title: `${formData.get('brand')} ${formData.get('model')} ${formData.get('year')}`,
+      description: formData.get('description'),
+      category: formData.get('category'),
       brand: formData.get('brand'),
       model: formData.get('model'),
       year: parseInt(formData.get('year'), 10),
       price: parseFloat(formData.get('price')),
-      mileage: formData.get('mileage') ? parseInt(formData.get('mileage'), 10) : null,
-      fuel: formData.get('fuel'),
-      category: formData.get('category'),
-      description: formData.get('description'),
-      images: this.selectedImages
+      mileage: formData.get('mileage') ? parseInt(formData.get('mileage'), 10) : 0,
+      specs: {
+        fuel: formData.get('fuel'),
+        transmission: 'Automática', // TODO: Agregar campo al formulario
+        motor: '', // TODO: Agregar campo al formulario
+        version: '', // TODO: Agregar campo al formulario
+        color: '', // TODO: Agregar campo al formulario
+        traction: '' // TODO: Agregar campo al formulario
+      },
+      condition: {
+        use: formData.get('mileage') === '0' || !formData.get('mileage') ? 'new' : 'used',
+        exterior: '', // TODO: Agregar campo al formulario
+        interior: '', // TODO: Agregar campo al formulario
+        mechanics: '' // TODO: Agregar campo al formulario
+      },
+      images: this.selectedImages // TODO: Implementar upload real de imágenes
     };
 
     console.log('💾 Datos del vehículo a guardar:', vehicleData);
     
-    // TODO: En integración con backend, enviar a API
-    // if (this.vehicleId) {
-    //   await vehicleService.update(this.vehicleId, vehicleData);
-    // } else {
-    //   await vehicleService.create(vehicleData);
-    // }
+    try {
+      // Obtener botón de submit para mostrar loading
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = this.vehicleId ? 'Actualizando...' : 'Guardando...';
 
-    alert(`Vehículo ${this.vehicleId ? 'actualizado' : 'creado'} exitosamente!\n\n${vehicleData.brand} ${vehicleData.model} ${vehicleData.year}\nPrecio: $${vehicleData.price.toLocaleString()}`);
-    
-    // Redirigir al catálogo
-    window.location.hash = '#catalog';
+      let result;
+      if (this.vehicleId) {
+        // Actualizar vehículo existente
+        result = await vehicleService.update(this.vehicleId, vehicleData);
+        alert(`✅ Vehículo actualizado correctamente!\n\n${result.title}\nPrecio: $${result.price.toLocaleString()}`);
+      } else {
+        // Crear nuevo vehículo
+        result = await vehicleService.create(vehicleData);
+        alert(`✅ Vehículo creado correctamente!\n\n${result.title}\nPrecio: $${result.price.toLocaleString()}`);
+      }
+
+      // Redirigir al catálogo
+      window.location.hash = '#catalog';
+      
+    } catch (error) {
+      console.error('❌ Error guardando vehículo:', error);
+      alert(`❌ Error al guardar: ${error.message}`);
+      
+      // Restaurar botón
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = false;
+      submitBtn.textContent = this.vehicleId ? 'Actualizar Vehículo' : 'Guardar Vehículo';
+    }
   }
 
   /**

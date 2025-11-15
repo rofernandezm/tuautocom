@@ -1,0 +1,119 @@
+/**
+ * API Client
+ * Cliente centralizado para comunicación con backend
+ * Maneja configuración, errores y transformación de respuestas
+ * 
+ * @class
+ */
+
+import { config } from '../config/config.js';
+
+class ApiClient {
+  constructor() {
+    this.baseURL = config.apiUrl;
+  }
+
+  /**
+   * Maneja errores HTTP
+   * @private
+   * @param {Response} response - Respuesta de fetch
+   * @returns {Promise<any>} Datos parseados
+   * @throws {Error} Si la respuesta no es exitosa
+   */
+  async _handleResponse(response) {
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ 
+        message: response.statusText 
+      }));
+      throw new Error(error.message || `HTTP Error: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * GET request
+   * @param {string} endpoint - Endpoint relativo (ej: '/vehicles')
+   * @returns {Promise<any>}
+   * 
+   * @example
+   * const vehicles = await apiClient.get('/vehicles');
+   */
+  async get(endpoint) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`);
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error(`❌ GET ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * POST request
+   * @param {string} endpoint - Endpoint relativo
+   * @param {Object} data - Datos a enviar
+   * @returns {Promise<any>}
+   * 
+   * @example
+   * const newVehicle = await apiClient.post('/vehicles', vehicleData);
+   */
+  async post(endpoint, data) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error(`❌ POST ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * PUT request
+   * @param {string} endpoint - Endpoint relativo
+   * @param {Object} data - Datos a actualizar
+   * @returns {Promise<any>}
+   * 
+   * @example
+   * const updated = await apiClient.put('/vehicles/123', vehicleData);
+   */
+  async put(endpoint, data) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error(`❌ PUT ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * DELETE request
+   * @param {string} endpoint - Endpoint relativo
+   * @returns {Promise<any>}
+   * 
+   * @example
+   * await apiClient.delete('/vehicles/123');
+   */
+  async delete(endpoint) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'DELETE'
+      });
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error(`❌ DELETE ${endpoint}:`, error);
+      throw error;
+    }
+  }
+}
+
+// Exportar instancia única (Singleton)
+export const apiClient = new ApiClient();

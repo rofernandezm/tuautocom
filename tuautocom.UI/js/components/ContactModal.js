@@ -9,6 +9,8 @@
  * @param {Function} onSubmit - Callback al enviar el formulario
  */
 
+import { inquiryService } from '../services/inquiryService.js';
+
 export class ContactModal {
   constructor(options = {}) {
     this.vehicle = options.vehicle || {};
@@ -344,32 +346,48 @@ export class ContactModal {
    * @private
    * @param {HTMLFormElement} form
    */
-  _handleSubmit(form) {
+  async _handleSubmit(form) {
     const formData = new FormData(form);
-    const data = {
-      vehicle: {
-        id: this.vehicle.id,
-        title: this.vehicle.title,
-        price: this.vehicle.price
-      },
-      contact: {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        message: formData.get('message')
-      }
+    
+    const inquiryData = {
+      vehicleId: this.vehicle.id,
+      vehicleTitle: this.vehicle.title,
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      message: formData.get('message')
     };
 
-    console.log('📧 Formulario enviado:', data);
-    
-    // Callback
-    this.onSubmit(data);
+    console.log('📧 Enviando consulta:', inquiryData);
 
-    // Cerrar modal después de enviar
-    this.close();
+    try {
+      // Obtener botón de submit para mostrar loading
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
 
-    // TODO: En integración con backend, enviar a API
-    alert(`Gracias ${data.contact.name}!\n\nTu consulta sobre "${data.vehicle.title}" ha sido enviada.\nTe contactaremos pronto.`);
+      // Enviar consulta al backend
+      await inquiryService.sendInquiry(inquiryData);
+      
+      // Callback
+      this.onSubmit(inquiryData);
+
+      // Mostrar mensaje de éxito
+      alert(`✅ Gracias ${inquiryData.name}!\n\nTu consulta sobre "${inquiryData.vehicleTitle}" ha sido enviada.\nTe contactaremos pronto al ${inquiryData.email}`);
+
+      // Cerrar modal
+      this.close();
+      
+    } catch (error) {
+      console.error('❌ Error enviando consulta:', error);
+      alert(`❌ Error al enviar consulta: ${error.message}\n\nPor favor, intenta nuevamente.`);
+      
+      // Restaurar botón
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar Consulta';
+    }
   }
 
   /**
