@@ -1,53 +1,42 @@
-# 🔧 Scripts de Setup - TuAutoCom
+# 🔧 Scripts - TuAutoCom
 
-Scripts automáticos para configurar el ambiente de desarrollo.
-
----
-
-## 📖 Documentación Centralizada
-
-**Toda la documentación está en:** [`docs/setup/`](../docs/setup/)
-
-- **Índice:** [`docs/setup/INDEX.md`](../docs/setup/INDEX.md)
-- **Guía rápida:** [`docs/setup/QUICKSTART.md`](../docs/setup/QUICKSTART.md)
-- **Configuración:** [`docs/setup/ENVIRONMENT.md`](../docs/setup/ENVIRONMENT.md)
-- **Windows:** [`docs/setup/WINDOWS.md`](../docs/setup/WINDOWS.md)
-- **Técnica:** [`docs/setup/SCRIPTS.md`](../docs/setup/SCRIPTS.md)
+Scripts de automatización para configuración del proyecto.
 
 ---
 
-## 🚀 Uso Rápido
-
-### Recomendado (Todos los SO)
+## 🚀 Uso (Recomendado)
 
 ```bash
+# Desde raíz del proyecto
 pnpm setup
 ```
 
-### Alternativas (Si algo falla)
-
-```powershell
-# Windows - PowerShell
-pnpm setup:win
-
-# Windows - Batch
-scripts\setup-dev-env.bat
-
-# macOS/Linux - Bash
-chmod +x scripts/setup-dev-env.sh
-./scripts/setup-dev-env.sh
-```
+Funciona en **Windows, macOS y Linux**.
 
 ---
 
-## 📁 Archivos
+## � Scripts Disponibles
 
-| Archivo | Lenguaje | SO | Uso |
-|---------|----------|----|----|
-| `setup-dev-env.js` | Node.js | ✅ Todos | **Principal** |
-| `setup-dev-env.ps1` | PowerShell | Windows | Alternativa |
-| `setup-dev-env.bat` | Batch | Windows | Alternativa |
-| `setup-dev-env.sh` | Bash | macOS/Linux | Alternativa |
+| Script | Plataforma | Uso |
+|--------|------------|-----|
+| `setup-dev-env.js` | Todas ✅ | **Principal** - Node.js |
+| `setup-dev-env.sh` | Linux/macOS | Alternativa Bash |
+| `setup-dev-env.ps1` | Windows | Alternativa PowerShell |
+| `setup-dev-env.bat` | Windows | Alternativa cmd |
+
+---
+
+## 📚 Documentación Completa
+
+Ver [`../docs/setup/README.md`](../docs/setup/README.md) para:
+- Guía completa de setup
+- Troubleshooting
+- Configuración manual
+- Variables de ambiente
+
+---
+
+**Última actualización:** 2025-11-20
 
 ---
 
