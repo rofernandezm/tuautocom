@@ -1,0 +1,34 @@
+# Configuración de line endings para git
+# Asegura consistencia entre Windows, macOS y Linux
+
+# Scripts - siempre LF (Unix)
+scripts/*.sh text eol=lf
+scripts/*.ps1 text eol=crlf
+scripts/*.bat text eol=crlf
+scripts/*.js text eol=lf
+
+# Documentación
+*.md text eol=lf
+
+# JSON - siempre LF
+*.json text eol=lf
+package.json text eol=lf
+tsconfig.json text eol=lf
+.env.dev.example text eol=lf
+
+# Archivos de configuración
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+
+# Archivos binarios
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
+*.exe binary
+*.dll binary
+
+# Node
+node_modules/ export-ignore
+pnpm-lock.yaml export-ignore

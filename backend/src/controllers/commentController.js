@@ -28,6 +28,19 @@ export async function getCommentById(req, res, next) {
   }
 }
 
+// Obtener comentarios por ID de vehículo
+export async function getCommentsByVehicle(req, res, next) {
+  try {
+    const { vehicleId } = req.params;
+    const comments = await Comment.find({ vehicleId }).sort({ createdAt: -1 });
+    
+    res.status(200).json(comments);
+  } catch (err) {
+    console.error('Error obteniendo comentarios del vehículo:', err.message);
+    next(err);
+  }
+}
+
 // Crear un nuevo comentario
 export async function createComment(req, res, next) {
   try {

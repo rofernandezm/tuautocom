@@ -5,6 +5,8 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "setup": "node scripts/setup-dev-env.js",
+    "setup:win": "powershell -ExecutionPolicy Bypass -File scripts/setup-dev-env.ps1",
     "ui:dev": "cd tuautocom.UI && pnpm run dev:watch",
     "ui:build": "cd tuautocom.UI && pnpm run build",
     "ui:serve": "cd tuautocom.UI && pnpm run serve",

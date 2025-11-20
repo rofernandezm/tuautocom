@@ -156,13 +156,21 @@ export class VehicleCard {
    * @returns {string} HTML de la información
    */
   _renderInfo() {
+    // Truncar descripción a máximo 60 caracteres para card
+    // En VehicleDetailView se mostrará completa
+    const maxDescLength = 60;
+    const description = this.data.description || 'Sin descripción';
+    const truncatedDesc = description.length > maxDescLength 
+      ? description.substring(0, maxDescLength) + '...' 
+      : description;
+    
     return `
       <div>
         <p class="text-white text-base font-medium leading-normal">
           ${this.data.title}
         </p>
-        <p class="text-[#8ecdb7] text-sm font-normal leading-normal">
-          ${this.data.description || 'Sin descripción'}
+        <p class="text-[#8ecdb7] text-sm font-normal leading-normal line-clamp-2">
+          ${truncatedDesc}
         </p>
       </div>
     `;

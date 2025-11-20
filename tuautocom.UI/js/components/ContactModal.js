@@ -39,7 +39,7 @@ export class ContactModal {
     this.container.setAttribute('data-modal', 'contact');
 
     this.container.innerHTML = `
-      <div class="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-[#10231c] rounded-lg shadow-2xl m-4">
+      <div class="relative w-full max-w-2xl px-5 max-h-[95vh] overflow-y-auto bg-[#10231c] rounded-lg shadow-2xl m-4">
         <!-- Botón cerrar (X) -->
         <button 
           data-action="close-modal"
@@ -73,8 +73,8 @@ export class ContactModal {
           <h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
             Contacto
           </h3>
-          <form data-contact-form>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <form data-contact-form class="w-full">
+            <div class="flex flex-wrap items-end gap-4 px-4 py-3">
               <label class="flex flex-col min-w-40 flex-1">
                 <p class="text-white text-base font-medium leading-normal pb-2">Nombre</p>
                 <input
@@ -86,7 +86,7 @@ export class ContactModal {
                 />
               </label>
             </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+            <div class="flex flex-wrap items-end gap-4 px-4 py-3">
               <label class="flex flex-col min-w-40 flex-1">
                 <p class="text-white text-base font-medium leading-normal pb-2">Email</p>
                 <input
@@ -98,7 +98,7 @@ export class ContactModal {
                 />
               </label>
             </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+            <div class="flex flex-wrap items-end gap-4 px-4 py-3">
               <label class="flex flex-col min-w-40 flex-1">
                 <p class="text-white text-base font-medium leading-normal pb-2">Teléfono</p>
                 <input
@@ -110,7 +110,7 @@ export class ContactModal {
                 />
               </label>
             </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+            <div class="flex flex-wrap items-end gap-4 px-4 py-3">
               <label class="flex flex-col min-w-40 flex-1">
                 <p class="text-white text-base font-medium leading-normal pb-2">Mensaje</p>
                 <textarea

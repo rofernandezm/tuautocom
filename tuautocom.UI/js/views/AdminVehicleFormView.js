@@ -48,7 +48,7 @@ export class AdminVehicleFormView {
    */
   render() {
     const view = document.createElement('div');
-    view.className = 'min-h-screen bg-[#10231c]';
+    view.className = 'min-h-screen bg-primary-dark';
 
     // Header
     const header = new Header();
@@ -74,7 +74,7 @@ export class AdminVehicleFormView {
     content.className = 'px-4 md:px-40 flex flex-1 justify-center py-5';
 
     content.innerHTML = `
-      <div class="flex flex-col w-full max-w-[512px] py-5">
+      <div class="flex flex-col w-full max-w-form-container-lg py-5">
         <!-- Título -->
         <div class="flex flex-wrap justify-between gap-3 p-4">
           <p class="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
@@ -85,13 +85,13 @@ export class AdminVehicleFormView {
         <!-- Formulario -->
         <form data-vehicle-form>
           <!-- Marca -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Marca</p>
+              <p class="form-label">Marca</p>
               <select
                 name="brand"
                 required
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-select"
               >
                 <option value="" disabled selected>Seleccione la marca</option>
                 <option value="toyota">Toyota</option>
@@ -109,24 +109,24 @@ export class AdminVehicleFormView {
           </div>
 
           <!-- Modelo -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Modelo</p>
+              <p class="form-label">Modelo</p>
               <input
                 type="text"
                 name="model"
                 required
                 placeholder="Ingrese el modelo"
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-input"
                 value="${this.vehicle?.model || ''}"
               />
             </label>
           </div>
 
           <!-- Año -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Año</p>
+              <p class="form-label">Año</p>
               <input
                 type="number"
                 name="year"
@@ -134,16 +134,16 @@ export class AdminVehicleFormView {
                 min="1900"
                 max="${new Date().getFullYear() + 1}"
                 placeholder="Ingrese el año"
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-input"
                 value="${this.vehicle?.year || ''}"
               />
             </label>
           </div>
 
           <!-- Precio -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Precio</p>
+              <p class="form-label">Precio</p>
               <input
                 type="number"
                 name="price"
@@ -151,35 +151,35 @@ export class AdminVehicleFormView {
                 min="0"
                 step="0.01"
                 placeholder="Ingrese el precio"
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-input"
                 value="${this.vehicle?.price || ''}"
               />
             </label>
           </div>
 
           <!-- Kilometraje -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Kilometraje (opcional)</p>
+              <p class="form-label">Kilometraje (opcional)</p>
               <input
                 type="number"
                 name="mileage"
                 min="0"
                 placeholder="Ingrese el kilometraje"
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-input"
                 value="${this.vehicle?.mileage || ''}"
               />
             </label>
           </div>
 
           <!-- Combustible -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Combustible</p>
+              <p class="form-label">Combustible</p>
               <select
                 name="fuel"
                 required
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-select"
               >
                 <option value="" disabled selected>Seleccione el tipo de combustible</option>
                 <option value="gasoline">Gasolina</option>
@@ -191,13 +191,13 @@ export class AdminVehicleFormView {
           </div>
 
           <!-- Categoría -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Categoría</p>
+              <p class="form-label">Categoría</p>
               <select
                 name="category"
                 required
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] h-14 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-select"
               >
                 <option value="" disabled selected>Seleccione la categoría</option>
                 <option value="sedan">Sedán</option>
@@ -213,14 +213,14 @@ export class AdminVehicleFormView {
           <!-- Subir Imágenes -->
           <div class="flex flex-col p-4">
             <div 
-              class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-[#2f6a55] px-6 py-14 cursor-pointer hover:border-[#8ecdb7] transition-colors"
+              class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-form-border px-6 py-14 cursor-pointer hover:border-form-border-focus transition-colors"
               data-image-dropzone
             >
-              <div class="flex max-w-[480px] flex-col items-center gap-2">
-                <p class="text-white text-lg font-bold leading-tight tracking-[-0.015em] max-w-[480px] text-center">
+              <div class="flex flex-col items-center gap-2">
+                <p class="text-white text-lg font-bold leading-tight tracking-[-0.015em] text-center">
                   Subir Imágenes
                 </p>
-                <p class="text-white text-sm font-normal leading-normal max-w-[480px] text-center">
+                <p class="text-white text-sm font-normal leading-normal text-center">
                   Arrastra y suelta imágenes aquí o haz clic para buscar
                 </p>
               </div>
@@ -238,13 +238,13 @@ export class AdminVehicleFormView {
           </div>
 
           <!-- Descripción -->
-          <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+          <div class="form-field-container">
             <label class="flex flex-col min-w-40 flex-1">
-              <p class="text-white text-base font-medium leading-normal pb-2">Descripción</p>
+              <p class="form-label">Descripción</p>
               <textarea
                 name="description"
                 placeholder="Ingrese una descripción detallada del vehículo"
-                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#2f6a55] bg-[#17352b] focus:border-[#8ecdb7] min-h-36 placeholder:text-[#8ecdb7] p-[15px] text-base font-normal leading-normal"
+                class="form-field-textarea"
               >${this.vehicle?.description || ''}</textarea>
             </label>
           </div>
@@ -255,13 +255,13 @@ export class AdminVehicleFormView {
               <button
                 type="button"
                 data-action="cancel"
-                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#2f6a55] transition-colors"
+                class="btn-secondary-lg"
               >
                 <span class="truncate">Cancelar</span>
               </button>
               <button
                 type="submit"
-                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#019863] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#017a4f] transition-colors"
+                class="btn-primary-lg"
               >
                 <span class="truncate">Guardar</span>
               </button>
@@ -313,16 +313,16 @@ export class AdminVehicleFormView {
       // Drag events
       dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropzone.classList.add('border-[#8ecdb7]', 'bg-[#17352b]');
+        dropzone.classList.add('border-form-border-focus', 'bg-form-bg');
       });
 
       dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('border-[#8ecdb7]', 'bg-[#17352b]');
+        dropzone.classList.remove('border-form-border-focus', 'bg-form-bg');
       });
 
       dropzone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropzone.classList.remove('border-[#8ecdb7]', 'bg-[#17352b]');
+        dropzone.classList.remove('border-form-border-focus', 'bg-form-bg');
         
         const files = Array.from(e.dataTransfer.files).filter(file => 
           file.type.startsWith('image/')
@@ -367,7 +367,7 @@ export class AdminVehicleFormView {
       
       reader.onload = (e) => {
         const preview = document.createElement('div');
-        preview.className = 'relative w-24 h-24 rounded-lg overflow-hidden border-2 border-[#2f6a55]';
+        preview.className = 'relative w-24 h-24 rounded-lg overflow-hidden border-2 border-form-border';
         preview.innerHTML = `
           <img 
             src="${e.target.result}" 
@@ -407,7 +407,8 @@ export class AdminVehicleFormView {
   async _handleSubmit(form) {
     const formData = new FormData(form);
     
-    // Construir objeto según schema de MongoDB
+    // Construir datos del vehículo (SIN imágenes - se enviarán aparte)
+    // 📝 NOTA: Las imágenes se envían vía multer en FormData, no en JSON
     const vehicleData = {
       title: `${formData.get('brand')} ${formData.get('model')} ${formData.get('year')}`,
       description: formData.get('description'),
@@ -431,7 +432,7 @@ export class AdminVehicleFormView {
         interior: '', // TODO: Agregar campo al formulario
         mechanics: '' // TODO: Agregar campo al formulario
       },
-      images: this.selectedImages // TODO: Implementar upload real de imágenes
+      // NO incluir images aquí - se manejan vía multer en FormData
     };
 
     console.log('💾 Datos del vehículo a guardar:', vehicleData);
@@ -444,13 +445,29 @@ export class AdminVehicleFormView {
       submitBtn.textContent = this.vehicleId ? 'Actualizando...' : 'Guardando...';
 
       let result;
+      
       if (this.vehicleId) {
         // Actualizar vehículo existente
         result = await vehicleService.update(this.vehicleId, vehicleData);
         alert(`✅ Vehículo actualizado correctamente!\n\n${result.title}\nPrecio: $${result.price.toLocaleString()}`);
       } else {
-        // Crear nuevo vehículo
-        result = await vehicleService.create(vehicleData);
+        // 📝 NOTA EDUCATIVA: FormData permite enviar archivos junto con datos
+        // Usamos multipart/form-data para enviar JSON + archivos binarios
+        const uploadFormData = new FormData();
+        
+        // Agregar campos de datos del vehículo como JSON
+        uploadFormData.append('data', JSON.stringify(vehicleData));
+        
+        // Agregar archivos de imágenes (multer los procesa automáticamente)
+        console.log('📝 DEBUG: selectedImages.length =', this.selectedImages.length);
+        this.selectedImages.forEach((file, idx) => {
+          console.log(`  [${idx}] ${file.name} - ${file.size} bytes - type: ${file.type}`);
+          uploadFormData.append('images', file);
+        });
+        
+        console.log('📸 Enviando', this.selectedImages.length, 'imagen(es) al servidor...');
+        
+        result = await vehicleService.createWithFiles(uploadFormData);
         alert(`✅ Vehículo creado correctamente!\n\n${result.title}\nPrecio: $${result.price.toLocaleString()}`);
       }
 

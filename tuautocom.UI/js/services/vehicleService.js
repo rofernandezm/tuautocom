@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from './apiClient.js';
+import { config } from '../config/config.js';
 
 class VehicleService {
   constructor() {
@@ -28,11 +29,21 @@ class VehicleService {
 
   /**
    * Mapea vehículo del backend al formato del frontend
+   * Construye URLs completas para imágenes almacenadas en /uploads
+   * 
    * @private
    * @param {Object} vehicle - Vehículo desde MongoDB
    * @returns {Object} Vehículo formateado para UI
    */
   _mapVehicle(vehicle) {
+    // Convertir rutas relativas a URLs completas para imágenes
+    const imageUrls = vehicle.images?.map(img => {
+      // Si ya es una URL completa, dejar como está
+      if (img.startsWith('http')) return img;
+      // Si es una ruta relativa, construir URL completa
+      return `${config.backendUrl}${img}`;
+    }) || [];
+
     return {
       id: vehicle._id,
       title: vehicle.title,
@@ -46,9 +57,9 @@ class VehicleService {
       fuel: vehicle.specs?.fuel || 'N/A',
       transmission: vehicle.specs?.transmission || 'N/A',
       condition: vehicle.condition?.use || 'N/A',
-      // Usar primera imagen o placeholder
-      image: vehicle.images?.[0] || 'https://via.placeholder.com/400x300?text=Sin+Imagen',
-      images: vehicle.images || [],
+      // Usar primera imagen con URL completa o placeholder
+      image: imageUrls[0] || 'https://via.placeholder.com/400x300?text=Sin+Imagen',
+      images: imageUrls,
       // Badge condicional basado en condición
       badge: vehicle.condition?.use === 'new' 
         ? { text: 'Nuevo' } 
@@ -95,6 +106,35 @@ class VehicleService {
       console.error(`⚠️ Error obteniendo vehículo ${id}:`, error);
       // Fallback a datos mock
       return this.mockVehicles.find(v => v.id === id) || null;
+    }
+  }
+
+  /**
+   * Crea un nuevo vehículo en MongoDB con carga de imágenes
+   * 📝 NOTA: Usa FormData para enviar archivos + datos JSON
+   * 
+   * @param {FormData} formData - FormData con 'data' (JSON) e 'images' (archivos)
+   * @returns {Promise<Object>}
+   * 
+   * @example
+   * const formData = new FormData();
+   * formData.append('data', JSON.stringify(vehicleData));
+   * formData.append('images', imageFile1);
+   * formData.append('images', imageFile2);
+   * const vehicle = await vehicleService.createWithFiles(formData);
+   */
+  async createWithFiles(formData) {
+    try {
+      // Extraer datos JSON del FormData para logging
+      const dataStr = formData.get('data');
+      console.log('📤 Enviando vehículo con imágenes al backend...');
+      
+      // apiClient.postForm no fija Content-Type, permitiendo multipart/form-data
+      const created = await apiClient.postForm('/vehicles', formData);
+      return this._mapVehicle(created);
+    } catch (error) {
+      console.error('❌ Error creando vehículo con imágenes:', error);
+      throw error;
     }
   }
 

@@ -10,6 +10,7 @@
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import { ContactModal } from '../components/ContactModal.js';
+import { CommentsSection } from '../components/CommentsSection.js';
 import { vehicleService } from '../services/vehicleService.js';
 
 export class VehicleDetailView {
@@ -18,6 +19,8 @@ export class VehicleDetailView {
     this.vehicle = null;
     this.container = null;
     this.currentImageIndex = 0;
+    this.specsExpanded = false; // Estado para toggle de especificaciones
+    this.commentsSection = null; // Referencia a CommentsSection
   }
 
   /**
@@ -29,6 +32,10 @@ export class VehicleDetailView {
       this.vehicle = await vehicleService.getById(this.vehicleId);
       if (!this.vehicle) {
         console.error(`Vehículo con ID ${this.vehicleId} no encontrado`);
+      } else {
+        // Inicializar CommentsSection
+        this.commentsSection = new CommentsSection(this.vehicleId);
+        await this.commentsSection.init();
       }
     } catch (error) {
       console.error('Error al cargar vehículo:', error);
@@ -125,7 +132,7 @@ export class VehicleDetailView {
       <h2 class="text-white tracking-light text-[28px] font-bold leading-tight px-4 text-left pb-3 pt-5">
         ${this.vehicle.title}
       </h2>
-      <p class="text-[#8ecdb7] text-sm font-normal leading-normal pb-3 pt-1 px-4">
+      <p class="text-primary-light text-sm font-normal leading-normal pb-3 pt-1 px-4">
         Desde $${this.vehicle.price.toLocaleString()}
       </p>
     `;
@@ -135,14 +142,26 @@ export class VehicleDetailView {
       const badgesContainer = document.createElement('div');
       badgesContainer.className = 'flex gap-3 p-3 flex-wrap pr-4';
       badgesContainer.innerHTML = `
-        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#214a3c] pl-4 pr-4">
+        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary-medium pl-4 pr-4">
           <p class="text-white text-sm font-medium leading-normal">${this.vehicle.badge.text}</p>
         </div>
       `;
       contentContainer.appendChild(badgesContainer);
     }
 
-    // Especificaciones
+    // Descripción completa del vehículo (NUEVO)
+    if (this.vehicle.description) {
+      const descriptionContainer = document.createElement('div');
+      descriptionContainer.className = 'px-4 py-3';
+      descriptionContainer.innerHTML = `
+        <p class="text-primary-light text-base font-normal leading-normal">
+          ${this.vehicle.description}
+        </p>
+      `;
+      contentContainer.appendChild(descriptionContainer);
+    }
+
+    // Especificaciones expandibles (MODIFICADO)
     contentContainer.appendChild(this._renderSpecifications());
 
     // Botón de acción
@@ -160,6 +179,11 @@ export class VehicleDetailView {
       </button>
     `;
     contentContainer.appendChild(actionContainer);
+
+    // Sección de comentarios (NUEVO)
+    if (this.commentsSection) {
+      contentContainer.appendChild(this.commentsSection.render());
+    }
 
     mainContainer.appendChild(contentContainer);
     this.container.appendChild(mainContainer);
@@ -192,7 +216,7 @@ export class VehicleDetailView {
 
     carouselContainer.innerHTML = `
       <div class="@[480px]:px-4 @[480px]:py-3">
-        <div class="relative bg-[#10231c] @[480px]:rounded-lg min-h-80" data-carousel-wrapper>
+        <div class="relative bg-primary-dark @[480px]:rounded-lg min-h-80" data-carousel-wrapper>
           <!-- Slides stack - todas las imágenes apiladas, solo una visible -->
           ${this.images.map((img, index) => `
             <div 
@@ -245,23 +269,45 @@ export class VehicleDetailView {
   }
 
   /**
-   * Renderiza el grid de especificaciones
+   * Renderiza el grid de especificaciones EXPANDIBLES con Vanilla JS
    * @private
    * @returns {HTMLElement}
    */
   _renderSpecifications() {
     const specsContainer = document.createElement('div');
     specsContainer.innerHTML = `
-      <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
-        Especificaciones
-      </h2>
-      <div class="p-4 grid grid-cols-2">
-        ${this._renderSpecRow('Marca', this.vehicle.brand?.charAt(0).toUpperCase() + this.vehicle.brand?.slice(1) || 'N/A')}
-        ${this._renderSpecRow('Año', this.vehicle.year || 'N/A')}
-        ${this._renderSpecRow('Tipo', this._formatType(this.vehicle.category))}
-        ${this._renderSpecRow('Combustible', this._formatFuel(this.vehicle.fuel))}
-        ${this._renderSpecRow('Kilometraje', `${this.vehicle.mileage.toLocaleString()} km`)}
-        ${this._renderSpecRow('Precio', `$${this.vehicle.price.toLocaleString()}`)}
+      <div class="px-4 py-3">
+        <!-- Header con botón toggle -->
+        <button 
+          data-specs-toggle
+          class="w-full flex items-center justify-between py-2 cursor-pointer group"
+        >
+          <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
+            Especificaciones
+          </h2>
+          <svg 
+            data-specs-icon
+            class="w-6 h-6 text-primary-light transition-transform duration-300 ${this.specsExpanded ? 'rotate-180' : ''}"
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Grid de especificaciones (colapsable) -->
+        <div 
+          data-specs-content
+          class="grid grid-cols-2 overflow-hidden transition-all duration-300 ${this.specsExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}"
+        >
+          ${this._renderSpecRow('Marca', this.vehicle.brand?.charAt(0).toUpperCase() + this.vehicle.brand?.slice(1) || 'N/A')}
+          ${this._renderSpecRow('Año', this.vehicle.year || 'N/A')}
+          ${this._renderSpecRow('Tipo', this._formatType(this.vehicle.category))}
+          ${this._renderSpecRow('Combustible', this._formatFuel(this.vehicle.fuel))}
+          ${this._renderSpecRow('Kilometraje', `${this.vehicle.mileage.toLocaleString()} km`)}
+          ${this._renderSpecRow('Precio', `$${this.vehicle.price.toLocaleString()}`)}
+        </div>
       </div>
     `;
     return specsContainer;
@@ -277,8 +323,8 @@ export class VehicleDetailView {
    */
   _renderSpecRow(label, value, isLeft = false) {
     return `
-      <div class="flex flex-col gap-1 border-t border-solid border-t-[#2f6a55] py-4 ${isLeft ? 'pr-2' : 'pl-2'}">
-        <p class="text-[#8ecdb7] text-sm font-normal leading-normal">${label}</p>
+      <div class="flex flex-col gap-1 border-t border-solid border-t-primary-medium py-4 ${isLeft ? 'pr-2' : 'pl-2'}">
+        <p class="text-primary-light text-sm font-normal leading-normal">${label}</p>
         <p class="text-white text-sm font-normal leading-normal">${value}</p>
       </div>
     `;
@@ -359,6 +405,12 @@ export class VehicleDetailView {
         window.location.hash = '#catalog';
       });
     }
+
+    // Toggle de especificaciones (NUEVO - Vanilla JS, NO Alpine.js)
+    const specsToggle = this.container.querySelector('[data-specs-toggle]');
+    if (specsToggle) {
+      specsToggle.addEventListener('click', () => this._toggleSpecifications());
+    }
   }
 
   /**
@@ -420,6 +472,32 @@ export class VehicleDetailView {
    * @private
    */
     /**
+   * Toggle del estado expandido/colapsado de especificaciones
+   * Implementación con Vanilla JS (NO Alpine.js)
+   * @private
+   */
+  _toggleSpecifications() {
+    this.specsExpanded = !this.specsExpanded;
+    
+    const content = this.container.querySelector('[data-specs-content]');
+    const icon = this.container.querySelector('[data-specs-icon]');
+    
+    if (!content || !icon) return;
+
+    if (this.specsExpanded) {
+      // Expandir
+      content.classList.remove('max-h-0', 'opacity-0');
+      content.classList.add('max-h-96', 'opacity-100');
+      icon.classList.add('rotate-180');
+    } else {
+      // Colapsar
+      content.classList.remove('max-h-96', 'opacity-100');
+      content.classList.add('max-h-0', 'opacity-0');
+      icon.classList.remove('rotate-180');
+    }
+  }
+
+  /**
    * Maneja el click en el botón "Solicitar más información"
    * Abre el modal de contacto con la información del vehículo
    * @private

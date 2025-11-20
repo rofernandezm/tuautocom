@@ -113,6 +113,36 @@ class ApiClient {
       throw error;
     }
   }
+
+  /**
+   * POST request con FormData (para archivos)
+   * ⚠️ No fijar Content-Type - el navegador lo hace automáticamente
+   * 
+   * @param {string} endpoint - Endpoint relativo
+   * @param {FormData} formData - FormData con campos y archivos
+   * @returns {Promise<any>}
+   * 
+   * @example
+   * const formData = new FormData();
+   * formData.append('data', JSON.stringify(vehicleData));
+   * formData.append('images', file1);
+   * formData.append('images', file2);
+   * const result = await apiClient.postForm('/vehicles', formData);
+   */
+  async postForm(endpoint, formData) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'POST',
+        // ⚠️ NO incluir Content-Type: fetch lo establece automáticamente
+        // esto es necesario para multipart/form-data boundaries
+        body: formData
+      });
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error(`❌ POST FORM ${endpoint}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Exportar instancia única (Singleton)
