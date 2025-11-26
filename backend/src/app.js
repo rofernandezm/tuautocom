@@ -14,7 +14,7 @@ const app = express();
 
 // Habilitar CORS para permitir peticiones desde el frontend (puerto 8000)
 app.use(cors({
-  origin: 'http://localhost:8000',
+  origin: ['http://localhost:8000', 'http://127.0.0.1:8000'],
   credentials: true
 }));
 
@@ -22,7 +22,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos de uploads
+// Servir archivos estáticos de uploads con CORS
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Rutas de API

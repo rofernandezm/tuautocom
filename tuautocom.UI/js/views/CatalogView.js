@@ -12,6 +12,7 @@ import { SortTabs } from '../components/SortTabs.js';
 import { VehicleCard } from '../components/VehicleCard.js';
 import { Pagination } from '../components/Pagination.js';
 import { Footer } from '../components/Footer.js';
+import { SearchBar } from '../components/SearchBar.js';
 import { vehicleService } from '../services/vehicleService.js';
 
 export class CatalogView {
@@ -21,23 +22,36 @@ export class CatalogView {
     this.filteredVehicles = [];
     this.currentPage = 1;
     this.itemsPerPage = 6;
+    this.totalPages = 1;
+    this.totalVehicles = 0;
     this.currentSort = 'priceAsc';
     this.currentFilters = {};
+    this.searchQuery = ''; // Búsqueda actual
   }
 
   /**
-   * Inicializa la vista cargando datos
+   * Inicializa la vista cargando datos desde backend con paginación
    * @async
    */
   async init() {
     try {
-      // Cargar todos los vehículos desde el servicio
-      this.vehicles = await vehicleService.getAll();
+      // Cargar vehículos desde el backend con paginación
+      const response = await vehicleService.getAll({
+        page: this.currentPage,
+        limit: this.itemsPerPage
+      });
+      
+      this.vehicles = response.data;
       this.filteredVehicles = [...this.vehicles];
+      this.totalPages = response.pagination.pages;
+      this.totalVehicles = response.pagination.total;
+      
+      console.log(`📦 Cargados ${this.vehicles.length} vehículos (página ${this.currentPage}/${this.totalPages}, total: ${this.totalVehicles})`);
     } catch (error) {
       console.error('Error al cargar vehículos en CatalogView:', error);
       this.vehicles = [];
       this.filteredVehicles = [];
+      this.totalPages = 1;
     }
   }
 
@@ -92,6 +106,16 @@ export class CatalogView {
       </div>
     `;
 
+    // Barra de búsqueda
+    const searchBar = new SearchBar({ placeholder: 'Buscar por marca, modelo...' });
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'px-4 mb-4';
+    searchContainer.appendChild(searchBar.render());
+    
+    // Escuchar evento de búsqueda
+    searchContainer.addEventListener('search', (e) => this._handleSearch(e.detail.query));
+    contentContainer.appendChild(searchContainer);
+
     // Tabs de ordenamiento
     const sortTabs = new SortTabs({
       onSort: (sortBy) => this._handleSort(sortBy)
@@ -104,11 +128,10 @@ export class CatalogView {
     this._renderVehiclesGrid(gridSection);
     contentContainer.appendChild(gridSection);
 
-    // Paginación
-    const totalPages = Math.ceil(this.filteredVehicles.length / this.itemsPerPage);
+    // Paginación - Usa totalPages desde el backend
     const pagination = new Pagination({
       currentPage: this.currentPage,
-      totalPages,
+      totalPages: this.totalPages,
       onPageChange: (page) => this._handlePageChange(page)
     });
     const paginationSection = document.createElement('div');
@@ -130,21 +153,16 @@ export class CatalogView {
   }
 
   /**
-   * Renderiza el grid de vehículos según página actual
+   * Renderiza el grid de vehículos (ya vienen paginados del backend)
    * @private
    * @param {HTMLElement} gridContainer
-   * 
-   * 📝 NOTA: Se establece min-height para mantener consistencia en la paginación
-   * Altura calculada: 2 filas × ~400px (aprox altura de card) = 800px mínimo
    */
   _renderVehiclesGrid(gridContainer) {
     gridContainer.innerHTML = '';
     gridContainer.className = 'grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-3 p-4 min-h-[800px]';
 
-    // Calcular vehículos de la página actual
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    const pageVehicles = this.filteredVehicles.slice(startIndex, endIndex);
+    // Los vehículos ya vienen paginados del backend
+    const pageVehicles = this.filteredVehicles;
 
     if (pageVehicles.length === 0) {
       gridContainer.innerHTML = '<p class="text-[#8ecdb7] text-center col-span-full p-8 min-h-[800px] flex items-center justify-center">No se encontraron vehículos con los filtros seleccionados.</p>';
@@ -158,72 +176,125 @@ export class CatalogView {
   }
 
   /**
-   * Maneja el cambio de página
+   * Maneja el cambio de página - Recarga datos desde backend
    * @private
    * @param {number} page
    */
-  _handlePageChange(page) {
+  async _handlePageChange(page) {
     this.currentPage = page;
+    
+    try {
+      // Recargar vehículos desde backend con nueva página
+      const response = await vehicleService.getAll({
+        page: this.currentPage,
+        limit: this.itemsPerPage
+      });
+      
+      this.vehicles = response.data;
+      this.filteredVehicles = [...this.vehicles];
+      this.totalPages = response.pagination.pages;
+      
+      console.log(`📦 Página ${page}: ${this.vehicles.length} vehículos cargados`);
+    } catch (error) {
+      console.error('Error al cambiar de página:', error);
+    }
+    
     this._updateCatalogContent();
   }
 
   /**
-   * Maneja la aplicación de filtros
+   * Maneja la aplicación de filtros - Envía al backend
    * @private
    * @param {Object} filters
    */
-  _handleFilters(filters) {
+  async _handleFilters(filters) {
     this.currentFilters = filters;
     this.currentPage = 1; // Reset a primera página
     
-    // Aplicar filtros a los vehículos
-    this.filteredVehicles = this.vehicles.filter(vehicle => {
-      // Filtro por marca
-      if (filters.brand !== 'all' && vehicle.brand !== filters.brand) {
-        return false;
-      }
+    try {
+      // Mapear filtros del frontend al formato del backend
+      const backendFilters = {
+        page: this.currentPage,
+        limit: this.itemsPerPage,
+        category: filters.type,
+        brand: filters.brand,
+        minPrice: filters.priceMin,
+        maxPrice: filters.priceMax,
+        year: filters.year,
+        // fuel y mileage pueden añadirse después
+      };
       
-      // Filtro por tipo
-      if (filters.type !== 'all' && vehicle.category !== filters.type) {
-        return false;
-      }
+      console.log('🔍 Aplicando filtros:', backendFilters);
       
-      // Filtro por año
-      if (filters.year !== 'all' && vehicle.year !== parseInt(filters.year, 10)) {
-        return false;
-      }
+      const response = await vehicleService.getAll(backendFilters);
       
-      // Filtro por precio (rango)
-      if (vehicle.price < filters.priceMin || vehicle.price > filters.priceMax) {
-        return false;
-      }
+      this.vehicles = response.data;
+      this.filteredVehicles = [...this.vehicles];
+      this.totalPages = response.pagination.pages;
+      this.totalVehicles = response.pagination.total;
       
-      // Filtro por combustible
-      if (filters.fuel !== 'all' && vehicle.fuel !== filters.fuel) {
-        return false;
-      }
-      
-      // Filtro por kilometraje (máximo)
-      if (vehicle.mileage > filters.mileage) {
-        return false;
-      }
-      
-      return true;
-    });
+      console.log(`📦 Filtros aplicados: ${this.totalVehicles} resultados`);
+    } catch (error) {
+      console.error('Error aplicando filtros:', error);
+    }
     
-    this._applySorting();
     this._updateCatalogContent();
   }
 
   /**
-   * Maneja el limpiado de filtros
+   * Maneja el limpiado de filtros - Recarga desde backend sin filtros
    * @private
    */
-  _handleClearFilters() {
+  async _handleClearFilters() {
     this.currentFilters = {};
     this.currentPage = 1;
-    this.filteredVehicles = [...this.vehicles];
-    this._applySorting();
+    
+    try {
+      const response = await vehicleService.getAll({
+        page: this.currentPage,
+        limit: this.itemsPerPage
+      });
+      
+      this.vehicles = response.data;
+      this.filteredVehicles = [...this.vehicles];
+      this.totalPages = response.pagination.pages;
+      this.totalVehicles = response.pagination.total;
+      
+      console.log('🧹 Filtros limpiados, recargados todos los vehículos');
+    } catch (error) {
+      console.error('Error limpiando filtros:', error);
+    }
+    
+    this._updateCatalogContent();
+  }
+
+  /**
+   * Maneja la búsqueda - Envía query al backend
+   * @private
+   * @param {string} query - Texto de búsqueda
+   */
+  async _handleSearch(query) {
+    this.searchQuery = query;
+    this.currentPage = 1;
+    
+    try {
+      const response = await vehicleService.getAll({
+        page: this.currentPage,
+        limit: this.itemsPerPage,
+        search: query,
+        ...this.currentFilters // Mantener filtros activos
+      });
+      
+      this.vehicles = response.data;
+      this.filteredVehicles = [...this.vehicles];
+      this.totalPages = response.pagination.pages;
+      this.totalVehicles = response.pagination.total;
+      
+      console.log(`🔎 Búsqueda "${query}": ${this.totalVehicles} resultados`);
+    } catch (error) {
+      console.error('Error en búsqueda:', error);
+    }
+    
     this._updateCatalogContent();
   }
 

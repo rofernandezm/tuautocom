@@ -18,7 +18,7 @@ const vehicleSchema = new mongoose.Schema({
     traction: { type: String},
   },
   condition: { 
-    use: { type: String, enum: ['new', 'used'], required: true },
+    use: { type: String, enum: ['new', 'used'], required: true, default: 'used' },
     exterior: { type: String },
     interior: { type: String },
     mechanics: { type: String},

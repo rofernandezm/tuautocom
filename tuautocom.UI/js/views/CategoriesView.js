@@ -29,8 +29,12 @@ export class CategoriesView {
     try {
       console.log('📂 Cargando datos para CategoriesView...');
       this.categories = await vehicleService.getCategories();
-      this.allVehicles = await vehicleService.getAll();
+      
+      // vehicleService.getAll() ahora retorna { data: [...], pagination: {...} }
+      const response = await vehicleService.getAll();
+      this.allVehicles = response.data || [];
       this.filteredVehicles = this.allVehicles;
+      
       console.log(`✅ ${this.allVehicles.length} vehículos cargados`);
     } catch (error) {
       console.error('❌ Error al cargar datos de categorías:', error);

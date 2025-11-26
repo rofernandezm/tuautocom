@@ -79,17 +79,47 @@ class VehicleService {
   }
 
   /**
-   * Obtiene todos los vehículos desde MongoDB
-   * @returns {Promise<Array>}
+   * Obtiene vehículos desde MongoDB con paginación y filtros
+   * @param {Object} options - Opciones de consulta
+   * @param {number} [options.page=1] - Número de página
+   * @param {number} [options.limit=12] - Vehículos por página
+   * @param {string} [options.category] - Filtrar por categoría
+   * @param {string} [options.brand] - Filtrar por marca
+   * @param {number} [options.minPrice] - Precio mínimo
+   * @param {number} [options.maxPrice] - Precio máximo
+   * @param {number} [options.year] - Filtrar por año
+   * @param {string} [options.search] - Búsqueda en título/descripción
+   * @param {string} [options.condition] - Condición (new/used)
+   * @returns {Promise<{data: Array, pagination: Object}>}
    */
-  async getAll() {
+  async getAll(options = {}) {
     try {
-      const vehicles = await apiClient.get('/vehicles');
-      return vehicles.map(v => this._mapVehicle(v));
+      const { page = 1, limit = 12, ...filters } = options;
+      
+      // Construir query params
+      const queryParams = new URLSearchParams({ page, limit });
+      
+      // Agregar filtros si existen
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '' && value !== 'all') {
+          queryParams.append(key, value);
+        }
+      });
+      
+      console.log(`🔍 Consultando: /vehicles?${queryParams}`);
+      
+      const response = await apiClient.get(`/vehicles?${queryParams}`);
+      
+      return {
+        data: response.data.map(v => this._mapVehicle(v)),
+        pagination: response.pagination
+      };
     } catch (error) {
       console.error('⚠️ Error obteniendo vehículos desde API, usando mock data:', error);
-      // Fallback a datos mock si hay error de conexión
-      return this.mockVehicles;
+      return {
+        data: this.mockVehicles,
+        pagination: { page: 1, limit: 12, total: this.mockVehicles.length, pages: 1 }
+      };
     }
   }
 
@@ -189,8 +219,8 @@ class VehicleService {
    * @returns {Promise<Array>}
    */
   async getFeatured() {
-    const all = await this.getAll();
-    return all.slice(0, 8);
+    const response = await this.getAll({ limit: 8 });
+    return response.data || [];
   }
 
   /**
@@ -198,7 +228,8 @@ class VehicleService {
    * @returns {Promise<Array>}
    */
   async getCheapest() {
-    const all = await this.getAll();
+    const response = await this.getAll({ limit: 100 }); // Obtener más para ordenar
+    const all = response.data || [];
     return all.sort((a, b) => a.price - b.price).slice(0, 8);
   }
 
@@ -209,8 +240,8 @@ class VehicleService {
    * @returns {Promise<Array>}
    */
   async getMostVisited() {
-    const all = await this.getAll();
-    return all.slice(0, 8); // Placeholder
+    const response = await this.getAll({ limit: 8 });
+    return response.data || [];
   }
 
   /**
@@ -219,14 +250,8 @@ class VehicleService {
    * @returns {Promise<Array>}
    */
   async search(searchTerm) {
-    const all = await this.getAll();
-    const term = searchTerm.toLowerCase();
-    return all.filter(v => 
-      v.title.toLowerCase().includes(term) ||
-      v.brand.toLowerCase().includes(term) ||
-      v.model.toLowerCase().includes(term) ||
-      v.description.toLowerCase().includes(term)
-    );
+    const response = await this.getAll({ search: searchTerm });
+    return response.data || [];
   }
 }
 

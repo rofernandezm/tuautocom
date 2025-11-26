@@ -1,10 +1,94 @@
 import { Vehicle } from '../models/Vehicle.js';
 
-// Obtener todos los vehículos
+/**
+ * Obtiene vehículos con paginación y filtros
+ * 
+ * Query params opcionales:
+ * - page: Número de página (default: 1)
+ * - limit: Vehículos por página (default: 12)
+ * - category: Filtrar por categoría (sedan, suv, pickup, etc.)
+ * - brand: Filtrar por marca
+ * - minPrice: Precio mínimo
+ * - maxPrice: Precio máximo
+ * - year: Filtrar por año
+ * - search: Búsqueda en título y descripción
+ * - condition: Filtrar por condición (new, used)
+ * 
+ * @param {Request} req - Request con query params
+ * @param {Response} res - Response con vehículos y metadata
+ */
 export async function getVehicles(req, res, next) {
   try {
-    const vehicles = await Vehicle.find();
-    res.status(200).json(vehicles);
+    // Parámetros de paginación
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    // Construir filtro de MongoDB
+    const filter = {};
+
+    // Filtro por categoría
+    if (req.query.category && req.query.category !== 'all') {
+      filter.category = req.query.category;
+    }
+
+    // Filtro por marca
+    if (req.query.brand && req.query.brand !== 'all') {
+      filter.brand = { $regex: req.query.brand, $options: 'i' };
+    }
+
+    // Filtro por rango de precio
+    if (req.query.minPrice || req.query.maxPrice) {
+      filter.price = {};
+      if (req.query.minPrice) filter.price.$gte = parseInt(req.query.minPrice);
+      if (req.query.maxPrice) filter.price.$lte = parseInt(req.query.maxPrice);
+    }
+
+    // Filtro por año
+    if (req.query.year && req.query.year !== 'all') {
+      filter.year = parseInt(req.query.year);
+    }
+
+    // Filtro por condición (nuevo/usado)
+    if (req.query.condition && req.query.condition !== 'all') {
+      filter['condition.use'] = req.query.condition;
+    }
+
+    // Búsqueda en título y descripción
+    if (req.query.search) {
+      filter.$or = [
+        { title: { $regex: req.query.search, $options: 'i' } },
+        { description: { $regex: req.query.search, $options: 'i' } },
+        { brand: { $regex: req.query.search, $options: 'i' } },
+        { model: { $regex: req.query.search, $options: 'i' } }
+      ];
+    }
+
+    console.log('🔍 Filtros aplicados:', JSON.stringify(filter));
+
+    // Contar total de documentos CON filtros
+    const total = await Vehicle.countDocuments(filter);
+    
+    // Obtener vehículos con filtros y paginación
+    const vehicles = await Vehicle.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const pages = Math.ceil(total / limit);
+
+    res.status(200).json({
+      data: vehicles,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages,
+        hasNext: page < pages,
+        hasPrev: page > 1
+      },
+      filters: filter // Devolver filtros aplicados para debug
+    });
   } catch (err) {
     console.error('Error al obtener vehículos:', err.message);
     next(err);

@@ -103,7 +103,8 @@ export class HomeView {
       }
 
       // Obtener todos los vehículos y filtrar por título/descripcion
-      const all = await vehicleService.getAll();
+      const response = await vehicleService.getAll();
+      const all = response.data || [];
       const q = query.toLowerCase();
       const results = all.filter(v => {
         const title = (v.title || '').toLowerCase();

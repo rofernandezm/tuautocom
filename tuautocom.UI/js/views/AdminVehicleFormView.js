@@ -94,6 +94,9 @@ export class AdminVehicleFormView {
                 class="form-field-select"
               >
                 <option value="" disabled selected>Seleccione la marca</option>
+                <option value="bmw">BMW</option>
+                <option value="citroen">Citroën</option>
+                <option value="peugeot">Peugeot</option>
                 <option value="toyota">Toyota</option>
                 <option value="honda">Honda</option>
                 <option value="ford">Ford</option>
@@ -226,7 +229,6 @@ export class AdminVehicleFormView {
               </div>
               <input
                 type="file"
-                name="images"
                 accept="image/*"
                 multiple
                 class="hidden"
@@ -405,21 +407,32 @@ export class AdminVehicleFormView {
    * @param {HTMLFormElement} form
    */
   async _handleSubmit(form) {
-    const formData = new FormData(form);
+    // ⚠️ NO usar new FormData(form) porque incluiría el input file con nombres solamente
+    // En su lugar, extraer campos manualmente
+    
+    // Extraer valores del formulario manualmente (sin el input file)
+    const getBrandValue = () => form.querySelector('[name="brand"]').value;
+    const getModelValue = () => form.querySelector('[name="model"]').value;
+    const getYearValue = () => form.querySelector('[name="year"]').value;
+    const getPriceValue = () => form.querySelector('[name="price"]').value;
+    const getMileageValue = () => form.querySelector('[name="mileage"]').value;
+    const getFuelValue = () => form.querySelector('[name="fuel"]').value;
+    const getCategoryValue = () => form.querySelector('[name="category"]').value;
+    const getDescriptionValue = () => form.querySelector('[name="description"]').value;
     
     // Construir datos del vehículo (SIN imágenes - se enviarán aparte)
     // 📝 NOTA: Las imágenes se envían vía multer en FormData, no en JSON
     const vehicleData = {
-      title: `${formData.get('brand')} ${formData.get('model')} ${formData.get('year')}`,
-      description: formData.get('description'),
-      category: formData.get('category'),
-      brand: formData.get('brand'),
-      model: formData.get('model'),
-      year: parseInt(formData.get('year'), 10),
-      price: parseFloat(formData.get('price')),
-      mileage: formData.get('mileage') ? parseInt(formData.get('mileage'), 10) : 0,
+      title: `${getBrandValue()} ${getModelValue()} ${getYearValue()}`,
+      description: getDescriptionValue(),
+      category: getCategoryValue(),
+      brand: getBrandValue(),
+      model: getModelValue(),
+      year: parseInt(getYearValue(), 10),
+      price: parseFloat(getPriceValue()),
+      mileage: getMileageValue() ? parseInt(getMileageValue(), 10) : 0,
       specs: {
-        fuel: formData.get('fuel'),
+        fuel: getFuelValue(),
         transmission: 'Automática', // TODO: Agregar campo al formulario
         motor: '', // TODO: Agregar campo al formulario
         version: '', // TODO: Agregar campo al formulario
@@ -427,7 +440,7 @@ export class AdminVehicleFormView {
         traction: '' // TODO: Agregar campo al formulario
       },
       condition: {
-        use: formData.get('mileage') === '0' || !formData.get('mileage') ? 'new' : 'used',
+        use: !getMileageValue() || getMileageValue() === '0' ? 'new' : 'used',
         exterior: '', // TODO: Agregar campo al formulario
         interior: '', // TODO: Agregar campo al formulario
         mechanics: '' // TODO: Agregar campo al formulario

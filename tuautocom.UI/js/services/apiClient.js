@@ -143,6 +143,34 @@ class ApiClient {
       throw error;
     }
   }
+
+  /**
+   * PUT request con FormData (para actualizar con archivos)
+   * ⚠️ No fijar Content-Type - el navegador lo hace automáticamente
+   * 
+   * @param {string} endpoint - Endpoint relativo
+   * @param {FormData} formData - FormData con campos y archivos
+   * @returns {Promise<any>}
+   * 
+   * @example
+   * const formData = new FormData();
+   * formData.append('data', JSON.stringify(vehicleData));
+   * formData.append('images', newImageFile);
+   * const result = await apiClient.putForm('/vehicles/123', formData);
+   */
+  async putForm(endpoint, formData) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'PUT',
+        // ⚠️ NO incluir Content-Type: fetch lo establece automáticamente
+        body: formData
+      });
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error(`❌ PUT FORM ${endpoint}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Exportar instancia única (Singleton)
