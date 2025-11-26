@@ -358,7 +358,7 @@ export class ContactModal {
       message: formData.get('message')
     };
 
-    console.log('📧 Enviando consulta:', inquiryData);
+  // Debugging: submission in progress (removed noisy console.log in production)
 
     try {
       // Obtener botón de submit para mostrar loading
@@ -373,15 +373,13 @@ export class ContactModal {
       // Callback
       this.onSubmit(inquiryData);
 
-      // Mostrar mensaje de éxito
-      alert(`✅ Gracias ${inquiryData.name}!\n\nTu consulta sobre "${inquiryData.vehicleTitle}" ha sido enviada.\nTe contactaremos pronto al ${inquiryData.email}`);
+  // Éxito: cerrar modal (no notificación visual añadida para evitar crear nuevas utilidades)
 
       // Cerrar modal
       this.close();
       
     } catch (error) {
-      console.error('❌ Error enviando consulta:', error);
-      alert(`❌ Error al enviar consulta: ${error.message}\n\nPor favor, intenta nuevamente.`);
+  console.error('Error enviando consulta:', error);
       
       // Restaurar botón
       const submitBtn = form.querySelector('button[type="submit"]');

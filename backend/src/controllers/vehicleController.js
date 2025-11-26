@@ -64,7 +64,7 @@ export async function getVehicles(req, res, next) {
       ];
     }
 
-    console.log('🔍 Filtros aplicados:', JSON.stringify(filter));
+  // Filtros aplicados -> ${JSON.stringify(filter)}
 
     // Contar total de documentos CON filtros
     const total = await Vehicle.countDocuments(filter);
@@ -115,16 +115,13 @@ export async function getVehicleById(req, res, next) {
 // Crear un nuevo vehículo
 export async function createVehicle(req, res, next) {
   try {
-    console.log('📝 Creando vehículo...');
-    console.log('   req.body keys:', Object.keys(req.body));
-    console.log('   req.files:', req.files ? `${req.files.length} archivos` : 'undefined');
-    console.log('   req.body.data tipo:', typeof req.body.data);
+  // Creando vehículo (documento)
     
     // DEBUG: mostrar todo el contenido de req.files si existe
     if (req.files) {
-      console.log('   Archivos detallados:');
+  // Archivos detallados:
       req.files.forEach((f, i) => {
-        console.log(`     [${i}] ${f.originalname} - ${f.size} bytes - mimetype: ${f.mimetype}`);
+  // Detalle archivo: [${i}] ${f.originalname}
       });
     }
     
@@ -144,25 +141,21 @@ export async function createVehicle(req, res, next) {
       vehicleData = req.body;
     }
 
-    console.log('✅ vehicleData parseado:', {
-      title: vehicleData.title,
-      brand: vehicleData.brand,
-      year: vehicleData.year,
-    });
+  // vehicleData parseado: (sanitized)
 
     // Procesar archivos de imágenes (multer los coloca en req.files)
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       vehicleData.images = req.files.map(file => `/uploads/${file.filename}`);
-      console.log('📸 Imágenes guardadas:', vehicleData.images);
+  // Imágenes guardadas: check vehicleData.images
     } else {
       // Si no hay imágenes, inicializar como array vacío
       vehicleData.images = [];
-      console.log('ℹ️ Sin imágenes en este vehículo');
+  // Sin imágenes en este vehículo
     }
     
     // Crear el vehículo en MongoDB
     const created = await Vehicle.create(vehicleData);
-    console.log('✅ Vehículo creado:', created._id);
+  // Vehículo creado: ${created._id}
     
     res.status(201).json(created);
   } catch (err) {
@@ -205,6 +198,120 @@ export async function deleteVehicle(req, res, next) {
     res.status(200).json({ message: 'Vehículo eliminado correctamente' });
   } catch (err) {
     console.error('Error eliminando vehículo:', err.message);
+    next(err);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONTROLADORES CON AGGREGATION PIPELINES
+// Objetivo educativo: Demostrar operaciones avanzadas de MongoDB
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/**
+ * Obtiene vehículos destacados usando MongoDB Aggregation Pipeline
+ * 
+ * Pipeline educativo:
+ * 1. $match: Filtrar nuevos O económicos (precio < 30000)
+ * 2. $sort: Ordenar por fecha de creación (más recientes primero)
+ * 3. $limit: Máximo 8 resultados
+ * 
+ * @route GET /api/vehicles/featured
+ */
+export async function getFeaturedVehicles(req, res, next) {
+  try {
+  // Ejecutando aggregation pipeline para vehículos destacados
+    
+    const featured = await Vehicle.aggregate([
+      // Stage 1: Filtrar vehículos nuevos O económicos
+      {
+        $match: {
+          $or: [
+            { 'condition.use': 'new' },    // Vehículos nuevos
+            { price: { $lt: 30000 } }      // Vehículos económicos
+          ]
+        }
+      },
+      // Stage 2: Ordenar por fecha de creación (más recientes primero)
+      {
+        $sort: { createdAt: -1 }
+      },
+      // Stage 3: Limitar a 8 resultados
+      {
+        $limit: 8
+      }
+    ]);
+
+  // Pipeline completado: ${featured.length} vehículos destacados
+    
+    res.status(200).json(featured);
+  } catch (err) {
+    console.error('❌ Error en aggregation pipeline (featured):', err.message);
+    next(err);
+  }
+}
+
+/**
+ * Obtiene vehículos más baratos usando MongoDB Aggregation Pipeline
+ * 
+ * Pipeline educativo:
+ * 1. $sort: Ordenar por precio ascendente (menor a mayor)
+ * 2. $limit: Máximo 8 resultados
+ * 
+ * @route GET /api/vehicles/cheapest
+ */
+export async function getCheapestVehicles(req, res, next) {
+  try {
+  // Ejecutando aggregation pipeline para vehículos más baratos
+    
+    const cheapest = await Vehicle.aggregate([
+      // Stage 1: Ordenar por precio (menor a mayor)
+      {
+        $sort: { price: 1 }
+      },
+      // Stage 2: Limitar a 8 resultados
+      {
+        $limit: 8
+      }
+    ]);
+
+  // Pipeline completado: ${cheapest.length} vehículos más baratos
+    
+    res.status(200).json(cheapest);
+  } catch (err) {
+    console.error('❌ Error en aggregation pipeline (cheapest):', err.message);
+    next(err);
+  }
+}
+
+/**
+ * Obtiene vehículos más recientes usando MongoDB Aggregation Pipeline
+ * 
+ * Pipeline educativo:
+ * 1. $sort: Ordenar por fecha de creación descendente
+ * 2. $limit: Máximo 8 resultados
+ * 
+ * @route GET /api/vehicles/recent
+ */
+export async function getMostRecentVehicles(req, res, next) {
+  try {
+  // Ejecutando aggregation pipeline para vehículos más recientes
+    
+    const recent = await Vehicle.aggregate([
+      // Stage 1: Ordenar por fecha de creación (más recientes primero)
+      {
+        $sort: { createdAt: -1 }
+      },
+      // Stage 2: Limitar a 8 resultados
+      {
+        $limit: 8
+      }
+    ]);
+
+  // Pipeline completado: ${recent.length} vehículos más recientes
+    
+    res.status(200).json(recent);
+  } catch (err) {
+    console.error('❌ Error en aggregation pipeline (recent):', err.message);
     next(err);
   }
 }

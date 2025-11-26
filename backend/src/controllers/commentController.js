@@ -32,8 +32,12 @@ export async function getCommentById(req, res, next) {
 export async function getCommentsByVehicle(req, res, next) {
   try {
     const { vehicleId } = req.params;
-    const comments = await Comment.find({ vehicleId }).sort({ createdAt: -1 });
     
+    // Buscar por campo "vehicle" (ObjectId), no "vehicleId"
+    const comments = await Comment.find({ vehicle: vehicleId })
+      .sort({ createdAt: -1 }); // Más recientes primero
+    
+  // Comentarios encontrados para vehículo: count = ${comments.length}
     res.status(200).json(comments);
   } catch (err) {
     console.error('Error obteniendo comentarios del vehículo:', err.message);

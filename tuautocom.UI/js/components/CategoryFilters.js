@@ -13,6 +13,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 import { theme } from '../config/theme.js';
+import { catalogService } from '../services/catalogService.js';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 2️⃣ CLASE DEL COMPONENTE
@@ -59,14 +60,10 @@ export class CategoryFilters {
    * @param {Object} config - Configuración del componente
    */
   constructor(config = {}) {
-    // Categorías por defecto si no se proporcionan
-    this.categories = config.categories || [
-      { id: 'suv', label: 'SUV' },
-      { id: 'sedan', label: 'Sedán' },
-      { id: 'pickup', label: 'Pick-up' },
-      { id: 'electricos', label: 'Eléctricos' },
-      { id: 'deportivos', label: 'Deportivos' }
-    ];
+    // Categorías: se cargarán desde el backend mediante catalogService
+    // 📝 NOTA EDUCATIVA:
+    // Ya no usamos datos hardcoded. Las categorías vienen de MongoDB.
+    this.categories = config.categories || [];
     
     // Estado interno: categoría actualmente seleccionada
     // 📝 NOTA EDUCATIVA:
@@ -76,9 +73,12 @@ export class CategoryFilters {
     // Callback para notificar cambios
     this.onChange = config.onChange;
     
-    // Validación
-    if (!Array.isArray(this.categories) || this.categories.length === 0) {
-      console.warn('CategoryFilters: Se requiere un array de categorías');
+    // Flag para indicar si las categorías han sido cargadas
+    this.categoriesLoaded = false;
+    
+    // Si se proporcionaron categorías, marcar como cargadas
+    if (this.categories.length > 0) {
+      this.categoriesLoaded = true;
     }
   }
   
@@ -100,6 +100,12 @@ export class CategoryFilters {
     // flex-wrap permite que las pills se envuelvan a la siguiente línea
     // si no caben en el ancho disponible (responsive)
     
+    // Si no hay categorías cargadas, mostrar loading
+    if (!this.categoriesLoaded || this.categories.length === 0) {
+      container.innerHTML = '<p class="text-white text-sm">Cargando categorías...</p>';
+      return container;
+    }
+    
     // Generar una pill por cada categoría
     this.categories.forEach(category => {
       const pill = this._createPill(category);
@@ -113,6 +119,51 @@ export class CategoryFilters {
     this._attachEventListeners(container);
     
     return container;
+  }
+  
+  /**
+   * Carga categorías desde el backend y re-renderiza
+   * 📝 NOTA EDUCATIVA:
+   * Este método es async porque consulta la API de MongoDB
+   * 
+   * @returns {Promise<void>}
+   */
+  async loadCategories() {
+    try {
+      this.categories = await catalogService.getCategories();
+      this.categoriesLoaded = true;
+    } catch (error) {
+      console.error('Error al cargar categorías:', error);
+      this.categoriesLoaded = false;
+    }
+  }
+  
+  /**
+   * Re-renderiza el componente con las categorías actualizadas
+   * 📝 NOTA EDUCATIVA:
+   * Útil después de loadCategories() para actualizar la UI
+   * 
+   * @param {HTMLElement} container - Contenedor a actualizar
+   */
+  updateRender(container) {
+    if (!container) return;
+    
+    // Limpiar contenido actual
+    container.innerHTML = '';
+    
+    if (!this.categoriesLoaded || this.categories.length === 0) {
+      container.innerHTML = '<p class="text-white text-sm">Cargando categorías...</p>';
+      return;
+    }
+    
+    // Regenerar pills
+    this.categories.forEach(category => {
+      const pill = this._createPill(category);
+      container.appendChild(pill);
+    });
+    
+    // Re-adjuntar event listeners
+    this._attachEventListeners(container);
   }
   
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -186,8 +237,6 @@ export class CategoryFilters {
       if (typeof this.onChange === 'function') {
         this.onChange(this.activeCategory);
       }
-      
-      console.log('📁 Categoría seleccionada:', this.activeCategory || 'Todas');
     });
   }
   
@@ -267,10 +316,33 @@ export class CategoryFilters {
 6. **API Pública**:
    - getActiveCategory() para leer estado
    - setActiveCategory() para modificar estado
+   - loadCategories() para cargar desde backend
+   - updateRender() para re-renderizar tras carga
+
+7. **Integración Backend**:
+   - Usa catalogService para obtener datos de MongoDB
+   - Operación MongoDB: Catalog.find({ type: 'categories' })
+   - Cache automático en catalogService (5 minutos)
+   - Fallback a datos mock si backend no responde
+
+📝 USO CON BACKEND:
+
+// Opción 1: Pre-cargar categorías antes de renderizar
+const filters = new CategoryFilters({ onChange: handleChange });
+await filters.loadCategories();
+const element = filters.render();
+document.body.appendChild(element);
+
+// Opción 2: Renderizar primero, cargar después
+const filters = new CategoryFilters({ onChange: handleChange });
+const element = filters.render();
+document.body.appendChild(element);
+await filters.loadCategories();
+filters.updateRender(element);
 
 📝 MEJORAS FUTURAS:
-- Agregar iconos a las categorías
+- Agregar iconos a las categorías desde MongoDB
 - Permitir selección múltiple
 - Animaciones al cambiar selección
-- Contador de items por categoría
+- Contador de items por categoría desde backend
 */

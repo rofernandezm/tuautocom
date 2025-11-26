@@ -184,16 +184,16 @@ export class Header {
   }
   
   /**
-   * Renderiza el botón de autenticación
+   * Renderiza el botón de consultas/reservas
    */
   _renderAuthButton() {
     return `
-      <button
-        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em]"
-        data-action="auth"
+      <a
+        href="#inquiries"
+        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#2f6a55] transition-colors"
       >
-        <span class="truncate">Iniciar sesión/Registrarse</span>
-      </button>
+        <span class="truncate">Ver Consultas</span>
+      </a>
     `;
   }
   
@@ -317,10 +317,6 @@ export class Header {
         searchInput.focus();
       });
     }
-    
-    // Event listener para botón de auth
-    const authBtn = header.querySelector('[data-action="auth"]');
-    authBtn?.addEventListener('click', () => this._handleAuth());
   }
   
   /**
@@ -328,7 +324,6 @@ export class Header {
    * 📝 NOTA: Por ahora solo log, después implementaremos routing real
    */
   _handleNavigation(route) {
-    console.log(`🔄 Navegando a: ${route}`);
     
     // Actualizar ruta actual
     this.currentRoute = route;
@@ -354,14 +349,6 @@ export class Header {
     });
     
     document.dispatchEvent(searchInputEvent);
-  }
-  
-  /**
-   * Maneja el click en autenticación
-   */
-  _handleAuth() {
-    console.log('👤 Login/Registro activado');
-    // 📝 TODO: Implementar modal o página de login
   }
 }
 

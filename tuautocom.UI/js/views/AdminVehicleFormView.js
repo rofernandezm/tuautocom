@@ -10,12 +10,21 @@
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import { vehicleService } from '../services/vehicleService.js';
+import { catalogService } from '../services/catalogService.js';
 
 export class AdminVehicleFormView {
   constructor(vehicleId = null) {
     this.vehicleId = vehicleId;
     this.vehicle = null;
     this.selectedImages = [];
+    this.catalogs = {
+      brands: [],
+      categories: [],
+      fuels: [],
+      transmissions: [],
+      colors: [],
+      tractions: []
+    };
   }
 
   /**
@@ -24,21 +33,38 @@ export class AdminVehicleFormView {
    * @async
    */
   async init() {
+    // Cargar catálogos desde backend
+    try {
+      const [brands, categories, fuels, transmissions, colors, tractions] = await Promise.all([
+        catalogService.getBrands(),
+        catalogService.getCategories(),
+        catalogService.getFuels(),
+        catalogService.getTransmissions(),
+        catalogService.getColors(),
+        catalogService.getItems('tractions')
+      ]);
+
+      this.catalogs.brands = brands;
+      this.catalogs.categories = categories;
+      this.catalogs.fuels = fuels;
+      this.catalogs.transmissions = transmissions;
+      this.catalogs.colors = colors;
+      this.catalogs.tractions = tractions;
+    } catch (error) {
+      console.error('Error cargando catálogos:', error);
+    }
+
     if (this.vehicleId) {
-      console.log('📝 Modo edición - ID:', this.vehicleId);
+      // Modo edición - cargar datos
       try {
         this.vehicle = await vehicleService.getById(this.vehicleId);
         if (!this.vehicle) {
-          console.error('❌ Vehículo no encontrado');
-          alert('Vehículo no encontrado');
+          console.error('Vehículo no encontrado');
           window.location.hash = '#catalog';
         }
       } catch (error) {
-        console.error('❌ Error cargando vehículo:', error);
-        alert('Error cargando datos del vehículo');
+        console.error('Error cargando vehículo:', error);
       }
-    } else {
-      console.log('📝 Modo creación - Nuevo vehículo');
     }
   }
 
@@ -92,21 +118,10 @@ export class AdminVehicleFormView {
                 name="brand"
                 required
                 class="form-field-select"
+                data-catalog="brands"
               >
                 <option value="" disabled selected>Seleccione la marca</option>
-                <option value="bmw">BMW</option>
-                <option value="citroen">Citroën</option>
-                <option value="peugeot">Peugeot</option>
-                <option value="toyota">Toyota</option>
-                <option value="honda">Honda</option>
-                <option value="ford">Ford</option>
-                <option value="chevrolet">Chevrolet</option>
-                <option value="nissan">Nissan</option>
-                <option value="mazda">Mazda</option>
-                <option value="volkswagen">Volkswagen</option>
-                <option value="hyundai">Hyundai</option>
-                <option value="kia">Kia</option>
-                <option value="tesla">Tesla</option>
+                ${this._renderCatalogOptions('brands')}
               </select>
             </label>
           </div>
@@ -183,12 +198,10 @@ export class AdminVehicleFormView {
                 name="fuel"
                 required
                 class="form-field-select"
+                data-catalog="fuels"
               >
                 <option value="" disabled selected>Seleccione el tipo de combustible</option>
-                <option value="gasoline">Gasolina</option>
-                <option value="diesel">Diésel</option>
-                <option value="hybrid">Híbrido</option>
-                <option value="electric">Eléctrico</option>
+                ${this._renderCatalogOptions('fuels')}
               </select>
             </label>
           </div>
@@ -201,14 +214,10 @@ export class AdminVehicleFormView {
                 name="category"
                 required
                 class="form-field-select"
+                data-catalog="categories"
               >
                 <option value="" disabled selected>Seleccione la categoría</option>
-                <option value="sedan">Sedán</option>
-                <option value="suv">SUV</option>
-                <option value="pickup">Pick-up</option>
-                <option value="hatchback">Hatchback</option>
-                <option value="coupe">Coupé</option>
-                <option value="electric">Eléctrico</option>
+                ${this._renderCatalogOptions('categories')}
               </select>
             </label>
           </div>
@@ -275,6 +284,19 @@ export class AdminVehicleFormView {
 
     this._attachEventListeners(content);
     return content;
+  }
+
+  /**
+   * Renderiza las opciones de un catálogo
+   * @private
+   * @param {string} catalogType - Tipo de catálogo (brands, categories, etc.)
+   * @returns {string} HTML de las opciones
+   */
+  _renderCatalogOptions(catalogType) {
+    const items = this.catalogs[catalogType] || [];
+    return items
+      .map(item => `<option value="${item.id}">${item.label}</option>`)
+      .join('');
   }
 
   /**
@@ -350,7 +372,7 @@ export class AdminVehicleFormView {
   _handleImageFiles(files, content) {
     this.selectedImages = [...this.selectedImages, ...files];
     this._renderImagePreviews(content);
-    console.log('📸 Imágenes seleccionadas:', this.selectedImages.length);
+  // Imágenes seleccionadas: manejar en upload flow
   }
 
   /**
@@ -448,7 +470,7 @@ export class AdminVehicleFormView {
       // NO incluir images aquí - se manejan vía multer en FormData
     };
 
-    console.log('💾 Datos del vehículo a guardar:', vehicleData);
+  // Datos del vehículo preparados para envío
     
     try {
       // Obtener botón de submit para mostrar loading
@@ -461,8 +483,7 @@ export class AdminVehicleFormView {
       
       if (this.vehicleId) {
         // Actualizar vehículo existente
-        result = await vehicleService.update(this.vehicleId, vehicleData);
-        alert(`✅ Vehículo actualizado correctamente!\n\n${result.title}\nPrecio: $${result.price.toLocaleString()}`);
+  result = await vehicleService.update(this.vehicleId, vehicleData);
       } else {
         // 📝 NOTA EDUCATIVA: FormData permite enviar archivos junto con datos
         // Usamos multipart/form-data para enviar JSON + archivos binarios
@@ -472,28 +493,20 @@ export class AdminVehicleFormView {
         uploadFormData.append('data', JSON.stringify(vehicleData));
         
         // Agregar archivos de imágenes (multer los procesa automáticamente)
-        console.log('📝 DEBUG: selectedImages.length =', this.selectedImages.length);
-        this.selectedImages.forEach((file, idx) => {
-          console.log(`  [${idx}] ${file.name} - ${file.size} bytes - type: ${file.type}`);
-          uploadFormData.append('images', file);
-        });
+        this.selectedImages.forEach((file) => uploadFormData.append('images', file));
         
-        console.log('📸 Enviando', this.selectedImages.length, 'imagen(es) al servidor...');
-        
-        result = await vehicleService.createWithFiles(uploadFormData);
-        alert(`✅ Vehículo creado correctamente!\n\n${result.title}\nPrecio: $${result.price.toLocaleString()}`);
+  result = await vehicleService.createWithFiles(uploadFormData);
       }
 
       // Redirigir al catálogo
       window.location.hash = '#catalog';
       
     } catch (error) {
-      console.error('❌ Error guardando vehículo:', error);
-      alert(`❌ Error al guardar: ${error.message}`);
+      console.error('Error guardando vehículo:', error);
       
       // Restaurar botón
       const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.disabled = false;
+  submitBtn.disabled = false;
       submitBtn.textContent = this.vehicleId ? 'Actualizar Vehículo' : 'Guardar Vehículo';
     }
   }

@@ -9,14 +9,14 @@ import { apiClient } from './apiClient.js';
 
 class InquiryService {
   /**
-   * Envía una consulta sobre un vehículo
+   * Envía una consulta sobre un vehículo (guarda en colección reservas)
    * @param {Object} inquiryData - Datos de la consulta
    * @param {string} inquiryData.vehicleId - ID del vehículo consultado
    * @param {string} inquiryData.vehicleTitle - Título del vehículo
    * @param {string} inquiryData.name - Nombre del interesado
    * @param {string} inquiryData.email - Email del interesado
    * @param {string} inquiryData.phone - Teléfono del interesado
-   * @param {string} inquiryData.message - Mensaje de consulta
+   * @param {string} inquiryData.message - Mensaje de consulta (opcional)
    * @returns {Promise<Object>} Consulta creada
    * 
    * @example
@@ -31,18 +31,28 @@ class InquiryService {
    */
   async sendInquiry(inquiryData) {
     try {
-      // Por ahora usar endpoint de comments como placeholder
-      // TODO: Crear endpoint dedicado /api/inquiries en backend
-      const commentData = {
-        vehicleId: inquiryData.vehicleId,
-        author: inquiryData.name,
+      // Separar nombre en firstName y lastName
+      const nameParts = inquiryData.name.trim().split(' ');
+      const authorFirstName = nameParts[0] || '';
+      const authorLastName = nameParts.slice(1).join(' ') || nameParts[0]; // Si solo hay un nombre, repetir
+      
+      // Crear reserva en la colección "reservas"
+      // Sin campo "status" - solo información para visualización
+      const reservationData = {
+        authorFirstName,
+        authorLastName,
         email: inquiryData.email,
-        phone: inquiryData.phone,
-        content: `${inquiryData.message}\n\nVehículo: ${inquiryData.vehicleTitle}`,
-        rating: 5 // Placeholder
+        phoneNumber: inquiryData.phone,
+        vehicle: inquiryData.vehicleId,
+        reservationDate: new Date().toISOString(),
+        // Información adicional del vehículo (desnormalizada para visualización)
+        vehicleTitle: inquiryData.vehicleTitle || '',
+        vehicleId: inquiryData.vehicleId,
+        // Mensaje opcional del usuario
+        ...(inquiryData.message && { message: inquiryData.message })
       };
       
-      const result = await apiClient.post('/comments', commentData);
+      const result = await apiClient.post('/reservations', reservationData);
       return result;
     } catch (error) {
       console.error('Error enviando consulta:', error);
@@ -51,13 +61,13 @@ class InquiryService {
   }
 
   /**
-   * Obtiene todas las consultas (para admin)
+   * Obtiene todas las consultas/reservas (para admin)
    * @returns {Promise<Array>}
    */
   async getAll() {
     try {
-      const inquiries = await apiClient.get('/comments');
-      return inquiries;
+      const reservations = await apiClient.get('/reservations');
+      return reservations;
     } catch (error) {
       console.error('Error obteniendo consultas:', error);
       return [];

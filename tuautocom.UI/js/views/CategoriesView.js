@@ -27,7 +27,7 @@ export class CategoriesView {
    */
   async init() {
     try {
-      console.log('📂 Cargando datos para CategoriesView...');
+  // Cargando datos para CategoriesView
       this.categories = await vehicleService.getCategories();
       
       // vehicleService.getAll() ahora retorna { data: [...], pagination: {...} }
@@ -35,7 +35,7 @@ export class CategoriesView {
       this.allVehicles = response.data || [];
       this.filteredVehicles = this.allVehicles;
       
-      console.log(`✅ ${this.allVehicles.length} vehículos cargados`);
+  // Datos cargados
     } catch (error) {
       console.error('❌ Error al cargar datos de categorías:', error);
       this.categories = [];
@@ -97,7 +97,7 @@ export class CategoriesView {
    * @param {string} categoryId
    */
   _onFilterChange(categoryId) {
-    console.log(`📂 Filtro cambiado a: ${categoryId}`);
+  // Filtro cambiado: ${categoryId}
     this.activeCategory = categoryId;
 
     // Filtrar vehículos
@@ -107,7 +107,7 @@ export class CategoriesView {
       this.filteredVehicles = this.allVehicles.filter(v => v.category === categoryId);
     }
 
-    console.log(`✅ ${this.filteredVehicles.length} vehículos filtrados`);
+  // ${this.filteredVehicles.length} vehículos filtrados
 
     // Re-renderizar grid
     this._renderVehicleGrid();

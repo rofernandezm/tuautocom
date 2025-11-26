@@ -46,7 +46,7 @@ export class CatalogView {
       this.totalPages = response.pagination.pages;
       this.totalVehicles = response.pagination.total;
       
-      console.log(`📦 Cargados ${this.vehicles.length} vehículos (página ${this.currentPage}/${this.totalPages}, total: ${this.totalVehicles})`);
+  // Vehículos cargados: página ${this.currentPage}/${this.totalPages}, total: ${this.totalVehicles}
     } catch (error) {
       console.error('Error al cargar vehículos en CatalogView:', error);
       this.vehicles = [];
@@ -194,7 +194,7 @@ export class CatalogView {
       this.filteredVehicles = [...this.vehicles];
       this.totalPages = response.pagination.pages;
       
-      console.log(`📦 Página ${page}: ${this.vehicles.length} vehículos cargados`);
+  // Página ${page}: ${this.vehicles.length} vehículos cargados
     } catch (error) {
       console.error('Error al cambiar de página:', error);
     }
@@ -224,7 +224,7 @@ export class CatalogView {
         // fuel y mileage pueden añadirse después
       };
       
-      console.log('🔍 Aplicando filtros:', backendFilters);
+  // Aplicando filtros: ${JSON.stringify(backendFilters)}
       
       const response = await vehicleService.getAll(backendFilters);
       
@@ -233,7 +233,7 @@ export class CatalogView {
       this.totalPages = response.pagination.pages;
       this.totalVehicles = response.pagination.total;
       
-      console.log(`📦 Filtros aplicados: ${this.totalVehicles} resultados`);
+  // Filtros aplicados: ${this.totalVehicles} resultados
     } catch (error) {
       console.error('Error aplicando filtros:', error);
     }
@@ -260,7 +260,7 @@ export class CatalogView {
       this.totalPages = response.pagination.pages;
       this.totalVehicles = response.pagination.total;
       
-      console.log('🧹 Filtros limpiados, recargados todos los vehículos');
+  // Filtros limpiados, recargados todos los vehículos
     } catch (error) {
       console.error('Error limpiando filtros:', error);
     }
@@ -290,7 +290,7 @@ export class CatalogView {
       this.totalPages = response.pagination.pages;
       this.totalVehicles = response.pagination.total;
       
-      console.log(`🔎 Búsqueda "${query}": ${this.totalVehicles} resultados`);
+  // Búsqueda "${query}": ${this.totalVehicles} resultados
     } catch (error) {
       console.error('Error en búsqueda:', error);
     }

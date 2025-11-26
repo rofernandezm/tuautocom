@@ -17,6 +17,7 @@ import { CatalogView } from './views/CatalogView.js';
 import { CategoriesView } from './views/CategoriesView.js';
 import { VehicleDetailView } from './views/VehicleDetailView.js';
 import { AdminVehicleFormView } from './views/AdminVehicleFormView.js';
+import { InquiriesView } from './views/InquiriesView.js';
 
 // 📝 NOTA EDUCATIVA:
 // La extensión .js es REQUERIDA en ES Modules del navegador
@@ -41,7 +42,7 @@ let currentView = null;
  * @param {string} route - Ruta a cargar (home, catalog, etc.)
  */
 async function navigateTo(route) {
-  console.log(`� Navegando a: ${route}`);
+  // Navegando a: (route)
   
   const appContainer = document.getElementById('app');
   if (!appContainer) {
@@ -65,23 +66,23 @@ async function navigateTo(route) {
   
   switch (basePath) {
     case 'catalog':
-      console.log('📂 Cargando CatalogView...');
+  // Cargando CatalogView
       currentView = new CatalogView();
       await currentView.init();
       appContainer.appendChild(currentView.render());
-      console.log('✅ CatalogView montada correctamente');
+  // CatalogView montada
       break;
       
     case 'categories':
-      console.log('📂 Cargando CategoriesView...');
+  // Cargando CategoriesView
       currentView = new CategoriesView();
       await currentView.init();
       appContainer.appendChild(currentView.render());
-      console.log('✅ CategoriesView montada correctamente');
+  // CategoriesView montada
       break;
       
     case 'vehicle':
-      console.log(`🚗 Cargando VehicleDetailView (ID: ${param})...`);
+  // Cargando VehicleDetailView
       if (!param) {
         console.error('❌ ID de vehículo no especificado');
         window.location.hash = '#catalog';
@@ -90,21 +91,21 @@ async function navigateTo(route) {
       currentView = new VehicleDetailView(param);
       await currentView.init();
       appContainer.appendChild(currentView.render());
-      console.log('✅ VehicleDetailView montada correctamente');
+  // VehicleDetailView montada
       break;
       
     case 'admin':
-      console.log('⚙️ Cargando AdminVehicleFormView...');
+  // Cargando AdminVehicleFormView
       // Soporte para admin/vehicles/new o admin/vehicles/edit/:id
       if (param === 'vehicles') {
         const action = routeParts[2]; // 'new' o 'edit'
         const vehicleId = routeParts[3]; // ID si es edición
         
         if (action === 'new') {
-          console.log('📝 Modo: Crear nuevo vehículo');
+          // Modo: Crear nuevo vehículo
           currentView = new AdminVehicleFormView();
         } else if (action === 'edit' && vehicleId) {
-          console.log(`📝 Modo: Editar vehículo (ID: ${vehicleId})`);
+          // Modo: Editar vehículo
           currentView = new AdminVehicleFormView(vehicleId);
         } else {
           console.error('❌ Ruta de administración inválida');
@@ -114,26 +115,34 @@ async function navigateTo(route) {
         
         await currentView.init();
         appContainer.appendChild(currentView.render());
-        console.log('✅ AdminVehicleFormView montada correctamente');
+  // AdminVehicleFormView montada
       } else {
         console.error('❌ Ruta de administración inválida');
         window.location.hash = '#home';
       }
       break;
       
+    case 'inquiries':
+  // Cargando InquiriesView
+      currentView = new InquiriesView();
+      await currentView.init();
+      appContainer.appendChild(currentView.render());
+  // InquiriesView montada
+      break;
+      
     case 'home':
     default:
-      console.log('🏠 Cargando HomeView...');
+  // Cargando HomeView
       currentView = new HomeView();
       await currentView.init();
       appContainer.appendChild(currentView.render());
-      console.log('✅ HomeView montada correctamente');
+  // HomeView montada
       break;
   }
 }
 
 async function initApp() {
-  console.log('🚀 TuAutoCom Application Started');
+  // TuAutoCom Application Started
 
   // 📝 NOTA EDUCATIVA: Routing simple basado en hash
   // Para probar diferentes vistas, cambiar la URL:

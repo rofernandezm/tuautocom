@@ -193,7 +193,6 @@ export class VehicleCard {
     // Click: Navegar a vista de detalle
     element.addEventListener('click', () => {
       const vehicleId = this.data.id;
-      console.log(`🚗 Navegando a detalle del vehículo: ${vehicleId}`);
       window.location.hash = `#vehicle/${vehicleId}`;
     });
     

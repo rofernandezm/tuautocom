@@ -503,15 +503,15 @@ export class VehicleDetailView {
    * @private
    */
   _handleRequestInfo() {
-    console.log('📧 Abriendo modal de contacto para:', this.vehicle.id);
+  // Abriendo modal de contacto para vehicle id: {{this.vehicle.id}}
     
     const modal = new ContactModal({
       vehicle: this.vehicle,
       onClose: () => {
-        console.log('📧 Modal cerrado');
+        // Modal cerrado
       },
       onSubmit: (data) => {
-        console.log('📧 Formulario enviado:', data);
+        // Formulario enviado (data): handled by onSubmit callback
         // TODO: En integración con backend, enviar a API
       }
     });

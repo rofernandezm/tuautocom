@@ -106,8 +106,6 @@ class VehicleService {
         }
       });
       
-      console.log(`🔍 Consultando: /vehicles?${queryParams}`);
-      
       const response = await apiClient.get(`/vehicles?${queryParams}`);
       
       return {
@@ -115,7 +113,7 @@ class VehicleService {
         pagination: response.pagination
       };
     } catch (error) {
-      console.error('⚠️ Error obteniendo vehículos desde API, usando mock data:', error);
+      console.error('Error obteniendo vehículos desde API:', error);
       return {
         data: this.mockVehicles,
         pagination: { page: 1, limit: 12, total: this.mockVehicles.length, pages: 1 }
@@ -133,7 +131,7 @@ class VehicleService {
       const vehicle = await apiClient.get(`/vehicles/${id}`);
       return this._mapVehicle(vehicle);
     } catch (error) {
-      console.error(`⚠️ Error obteniendo vehículo ${id}:`, error);
+      console.error(`Error obteniendo vehículo ${id}:`, error);
       // Fallback a datos mock
       return this.mockVehicles.find(v => v.id === id) || null;
     }
@@ -155,15 +153,11 @@ class VehicleService {
    */
   async createWithFiles(formData) {
     try {
-      // Extraer datos JSON del FormData para logging
-      const dataStr = formData.get('data');
-      console.log('📤 Enviando vehículo con imágenes al backend...');
-      
       // apiClient.postForm no fija Content-Type, permitiendo multipart/form-data
       const created = await apiClient.postForm('/vehicles', formData);
       return this._mapVehicle(created);
     } catch (error) {
-      console.error('❌ Error creando vehículo con imágenes:', error);
+      console.error('Error creando vehículo con imágenes:', error);
       throw error;
     }
   }
@@ -178,7 +172,7 @@ class VehicleService {
       const created = await apiClient.post('/vehicles', vehicleData);
       return this._mapVehicle(created);
     } catch (error) {
-      console.error('❌ Error creando vehículo:', error);
+      console.error('Error creando vehículo:', error);
       throw error;
     }
   }
@@ -194,7 +188,7 @@ class VehicleService {
       const updated = await apiClient.put(`/vehicles/${id}`, vehicleData);
       return this._mapVehicle(updated);
     } catch (error) {
-      console.error(`❌ Error actualizando vehículo ${id}:`, error);
+      console.error(`Error actualizando vehículo ${id}:`, error);
       throw error;
     }
   }
@@ -209,39 +203,67 @@ class VehicleService {
       await apiClient.delete(`/vehicles/${id}`);
       return true;
     } catch (error) {
-      console.error(`❌ Error eliminando vehículo ${id}:`, error);
+      console.error(`Error eliminando vehículo ${id}:`, error);
       return false;
     }
   }
 
   /**
-   * Obtiene vehículos destacados (primeros 8)
+   * Obtiene vehículos destacados desde MongoDB usando Aggregation Pipeline
+   * 
+   * Backend ejecuta:
+   * - $match: condition.use='new' OR price < 30000
+   * - $sort: createdAt DESC
+   * - $limit: 8
+   * 
    * @returns {Promise<Array>}
    */
   async getFeatured() {
-    const response = await this.getAll({ limit: 8 });
-    return response.data || [];
+    try {
+      const featured = await apiClient.get('/vehicles/featured');
+      return featured.map(v => this._mapVehicle(v));
+    } catch (error) {
+      console.error('Error obteniendo vehículos destacados:', error);
+      return [];
+    }
   }
 
   /**
-   * Obtiene vehículos más baratos (ordenados por precio)
+   * Obtiene vehículos más baratos desde MongoDB usando Aggregation Pipeline
+   * 
+   * Backend ejecuta:
+   * - $sort: price ASC
+   * - $limit: 8
+   * 
    * @returns {Promise<Array>}
    */
   async getCheapest() {
-    const response = await this.getAll({ limit: 100 }); // Obtener más para ordenar
-    const all = response.data || [];
-    return all.sort((a, b) => a.price - b.price).slice(0, 8);
+    try {
+      const cheapest = await apiClient.get('/vehicles/cheapest');
+      return cheapest.map(v => this._mapVehicle(v));
+    } catch (error) {
+      console.error('Error obteniendo vehículos más baratos:', error);
+      return [];
+    }
   }
 
   /**
-   * Obtiene vehículos más visitados 
-   * TODO: Implementar contador de visitas en backend
-   * Por ahora retorna los más recientes
+   * Obtiene vehículos más recientes desde MongoDB usando Aggregation Pipeline
+   * 
+   * Backend ejecuta:
+   * - $sort: createdAt DESC
+   * - $limit: 8
+   * 
    * @returns {Promise<Array>}
    */
-  async getMostVisited() {
-    const response = await this.getAll({ limit: 8 });
-    return response.data || [];
+  async getMostRecent() {
+    try {
+      const recent = await apiClient.get('/vehicles/recent');
+      return recent.map(v => this._mapVehicle(v));
+    } catch (error) {
+      console.error('Error obteniendo vehículos más recientes:', error);
+      return [];
+    }
   }
 
   /**

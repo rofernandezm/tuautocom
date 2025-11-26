@@ -43,7 +43,7 @@ class ApiClient {
       const response = await fetch(`${this.baseURL}${endpoint}`);
       return this._handleResponse(response);
     } catch (error) {
-      console.error(`❌ GET ${endpoint}:`, error);
+      console.error(`GET ${endpoint}:`, error);
       throw error;
     }
   }
@@ -66,7 +66,7 @@ class ApiClient {
       });
       return this._handleResponse(response);
     } catch (error) {
-      console.error(`❌ POST ${endpoint}:`, error);
+      console.error(`POST ${endpoint}:`, error);
       throw error;
     }
   }
@@ -89,7 +89,7 @@ class ApiClient {
       });
       return this._handleResponse(response);
     } catch (error) {
-      console.error(`❌ PUT ${endpoint}:`, error);
+      console.error(`PUT ${endpoint}:`, error);
       throw error;
     }
   }
@@ -109,7 +109,7 @@ class ApiClient {
       });
       return this._handleResponse(response);
     } catch (error) {
-      console.error(`❌ DELETE ${endpoint}:`, error);
+      console.error(`DELETE ${endpoint}:`, error);
       throw error;
     }
   }
@@ -139,7 +139,7 @@ class ApiClient {
       });
       return this._handleResponse(response);
     } catch (error) {
-      console.error(`❌ POST FORM ${endpoint}:`, error);
+      console.error(`POST FORM ${endpoint}:`, error);
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class ApiClient {
       });
       return this._handleResponse(response);
     } catch (error) {
-      console.error(`❌ PUT FORM ${endpoint}:`, error);
+      console.error(`PUT FORM ${endpoint}:`, error);
       throw error;
     }
   }

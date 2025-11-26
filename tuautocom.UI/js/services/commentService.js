@@ -1,7 +1,7 @@
 /**
  * Comment Service
  * Maneja todas las operaciones relacionadas con comentarios de vehículos
- * Conectado a backend MongoDB vía API REST
+ * Colección MongoDB: comentarios
  */
 
 import { apiClient } from './apiClient.js';
@@ -9,6 +9,8 @@ import { apiClient } from './apiClient.js';
 class CommentService {
   /**
    * Obtiene comentarios de un vehículo específico
+   * Operación MongoDB: Comment.find({ vehicle: vehicleId })
+   * 
    * @param {string} vehicleId - ID del vehículo
    * @returns {Promise<Array>}
    */
@@ -17,14 +19,15 @@ class CommentService {
       const comments = await apiClient.get(`/comments/vehicle/${vehicleId}`);
       return comments.map(c => this._mapComment(c));
     } catch (error) {
-      console.error(`❌ Error obteniendo comentarios del vehículo ${vehicleId}:`, error);
-      // Retornar array vacío si hay error
+      console.error(`Error obteniendo comentarios del vehículo ${vehicleId}:`, error);
       return [];
     }
   }
 
   /**
    * Crea un nuevo comentario para un vehículo
+   * Operación MongoDB: Comment.create()
+   * 
    * @param {string} vehicleId - ID del vehículo
    * @param {Object} commentData - Datos del comentario
    * @param {string} [commentData.name] - Nombre del usuario (opcional)
@@ -33,16 +36,17 @@ class CommentService {
    */
   async create(vehicleId, commentData) {
     try {
+      // Payload con nombres del modelo backend
       const payload = {
-        vehicleId,
-        name: commentData.name || 'Usuario Anónimo',
-        text: commentData.text,
+        vehicle: vehicleId,
+        authorName: commentData.name || 'Usuario Anónimo',
+        content: commentData.text,
       };
 
       const created = await apiClient.post('/comments', payload);
       return this._mapComment(created);
     } catch (error) {
-      console.error('❌ Error creando comentario:', error);
+      console.error('Error creando comentario:', error);
       throw error;
     }
   }
@@ -56,10 +60,10 @@ class CommentService {
   _mapComment(comment) {
     return {
       id: comment._id,
-      vehicleId: comment.vehicleId,
-      name: comment.name || 'Usuario Anónimo',
-      text: comment.text,
-      createdAt: comment.createdAt || new Date().toISOString(),
+      vehicleId: comment.vehicle,
+      name: comment.authorName || 'Usuario Anónimo',
+      text: comment.content,
+      createdAt: comment.createdAt || comment.date || new Date().toISOString(),
     };
   }
 }

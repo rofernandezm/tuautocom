@@ -14,9 +14,9 @@ import { vehicleService } from '../services/vehicleService.js';
 export class HomeView {
   constructor() {
     this.container = null;
-    this.featuredVehicles = [];
-    this.cheapestVehicles = [];
-    this.mostVisitedVehicles = [];
+    this.featuredVehicles = [];      // Vehículos destacados (nuevos)
+    this.cheapestVehicles = [];      // Vehículos más baratos
+    this.recentVehicles = [];        // Vehículos más recientes
     // Elementos y bindings para búsqueda
     this._searchResultsSection = null;
     this._onSearchInputBound = (event) => this._onSearchInput(event);
@@ -26,20 +26,23 @@ export class HomeView {
 
   /**
    * init - carga datos necesarios para la vista desde vehicleService
-   * En esta fase usamos datos mock; en integración con backend
-   * se reemplazará por llamadas a servicios reales.
+   * Carga diferentes conjuntos de datos para cada carousel
    */
   async init() {
     try {
+      // Vehículos nuevos (destacados)
       this.featuredVehicles = await vehicleService.getFeatured();
+      
+      // Vehículos más baratos (ordenados por precio)
       this.cheapestVehicles = await vehicleService.getCheapest();
-      this.mostVisitedVehicles = await vehicleService.getMostVisited();
+      
+      // Vehículos más recientes (agregados recientemente)
+      this.recentVehicles = await vehicleService.getMostRecent();
     } catch (error) {
-      // Mensaje en español según AGENT.md
       console.error('Error al cargar los datos de HomeView:', error);
       this.featuredVehicles = [];
       this.cheapestVehicles = [];
-      this.mostVisitedVehicles = [];
+      this.recentVehicles = [];
     }
   }
 
@@ -166,20 +169,20 @@ export class HomeView {
   }
 
   /**
-   * Renderiza los carousels normales (featured, cheapest, mostVisited)
+   * Renderiza los carousels normales (featured, cheapest, recent)
    * @private
    * @param {HTMLElement} container
    */
   _renderCarousels(container) {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Sección 1: Más vistos (carrusel)
+    // Sección 1: Vehículos Destacados (nuevos y en oferta)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (this.featuredVehicles.length > 0) {
       const featuredSection = document.createElement('section');
       featuredSection.className = 'my-6';
       const featuredTitle = document.createElement('h3');
       featuredTitle.className = 'text-xl font-bold mb-3';
-      featuredTitle.textContent = 'Más vistos';
+      featuredTitle.textContent = 'Vehículos Destacados';
       featuredSection.appendChild(featuredTitle);
       const featuredCarousel = new VehicleCarousel({ items: this.featuredVehicles });
       featuredSection.appendChild(featuredCarousel.render());
@@ -187,14 +190,14 @@ export class HomeView {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Sección 2: Más baratos (carrusel)
+    // Sección 2: Más Baratos (ordenados por precio menor a mayor)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (this.cheapestVehicles.length > 0) {
       const cheapestSection = document.createElement('section');
       cheapestSection.className = 'my-6';
       const cheapestTitle = document.createElement('h3');
       cheapestTitle.className = 'text-xl font-bold mb-3';
-      cheapestTitle.textContent = 'Más baratos';
+      cheapestTitle.textContent = 'Más Baratos';
       cheapestSection.appendChild(cheapestTitle);
       const cheapestCarousel = new VehicleCarousel({ items: this.cheapestVehicles });
       cheapestSection.appendChild(cheapestCarousel.render());
@@ -202,18 +205,18 @@ export class HomeView {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Sección 3: Más visitados (carrusel)
+    // Sección 3: Más Recientes (agregados recientemente)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (this.mostVisitedVehicles.length > 0) {
-      const visitedSection = document.createElement('section');
-      visitedSection.className = 'my-6';
-      const visitedTitle = document.createElement('h3');
-      visitedTitle.className = 'text-xl font-bold mb-3';
-      visitedTitle.textContent = 'Más visitados';
-      visitedSection.appendChild(visitedTitle);
-      const visitedCarousel = new VehicleCarousel({ items: this.mostVisitedVehicles });
-      visitedSection.appendChild(visitedCarousel.render());
-      container.appendChild(visitedSection);
+    if (this.recentVehicles.length > 0) {
+      const recentSection = document.createElement('section');
+      recentSection.className = 'my-6';
+      const recentTitle = document.createElement('h3');
+      recentTitle.className = 'text-xl font-bold mb-3';
+      recentTitle.textContent = 'Recién Agregados';
+      recentSection.appendChild(recentTitle);
+      const recentCarousel = new VehicleCarousel({ items: this.recentVehicles });
+      recentSection.appendChild(recentCarousel.render());
+      container.appendChild(recentSection);
     }
   }
 

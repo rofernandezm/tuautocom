@@ -1,6 +1,7 @@
 /**
  * CommentsSection Component
  * Sección de comentarios con formulario y lista
+ * Colección MongoDB: comentarios
  * 
  * @class
  * @param {string} vehicleId - ID del vehículo
@@ -15,13 +16,13 @@ export class CommentsSection {
   }
 
   /**
-   * Inicializa cargando comentarios desde el backend
+   * Inicializa cargando comentarios desde MongoDB
+   * Operación: Comment.find({ vehicle: vehicleId })
    * @async
    */
   async init() {
     try {
       this.comments = await commentService.getByVehicleId(this.vehicleId);
-      console.log(`📝 ${this.comments.length} comentarios cargados para vehículo ${this.vehicleId}`);
     } catch (error) {
       console.error('Error cargando comentarios:', error);
       this.comments = [];
@@ -34,11 +35,11 @@ export class CommentsSection {
    */
   render() {
     const section = document.createElement('div');
-    section.className = 'mt-8 px-4 py-3';
+    section.className = 'mt-8 px-4 py-6 bg-primary-medium rounded-lg';
     
     section.innerHTML = `
-      <h3 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">
-        Comentarios
+      <h3 class="text-white text-2xl font-bold leading-tight tracking-[-0.015em] pb-6 border-b border-primary-light/30">
+        💬 Comentarios (${this.comments.length})
       </h3>
       
       <!-- Formulario de comentarios -->
@@ -59,33 +60,33 @@ export class CommentsSection {
    */
   _renderForm() {
     return `
-      <form data-comment-form class="flex flex-col gap-4 mb-8">
+      <form data-comment-form class="flex flex-col gap-4 mt-6 mb-8 p-4 bg-primary-dark rounded-lg border border-primary-light/20">
         <label class="block">
-          <span class="text-primary-light text-sm font-medium leading-normal mb-1 block">Nombre</span>
+          <span class="text-primary-light text-sm font-semibold leading-normal mb-2 block">Nombre (opcional)</span>
           <input 
             type="text"
             name="name"
-            placeholder="Tu nombre (opcional)"
-            class="form-field-input w-full"
+            placeholder="Tu nombre"
+            class="w-full px-4 py-3 bg-form-bg text-white rounded-lg border border-form-border focus:border-form-border-focus focus:outline-none transition-colors"
           />
         </label>
         
         <label class="block">
-          <span class="text-primary-light text-sm font-medium leading-normal mb-1 block">Comentario</span>
+          <span class="text-primary-light text-sm font-semibold leading-normal mb-2 block">Comentario *</span>
           <textarea 
             name="text"
             required
             placeholder="Escribe tu comentario aquí..."
             rows="4"
-            class="form-field-textarea w-full"
+            class="w-full px-4 py-3 bg-form-bg text-white rounded-lg border border-form-border focus:border-form-border-focus focus:outline-none transition-colors resize-none"
           ></textarea>
         </label>
         
         <button 
           type="submit"
-          class="btn-primary self-start"
+          class="self-start px-6 py-3 bg-success hover:bg-success-hover text-white font-bold rounded-lg transition-colors"
         >
-          <span class="truncate">Publicar comentario</span>
+          <span class="truncate">📝 Publicar comentario</span>
         </button>
       </form>
     `;
@@ -99,14 +100,15 @@ export class CommentsSection {
   _renderCommentsList() {
     if (this.comments.length === 0) {
       return `
-        <div class="text-primary-light text-sm font-normal leading-normal py-8 text-center">
-          No hay comentarios aún. ¡Sé el primero en comentar!
+        <div class="text-center py-8 px-4 bg-primary-dark rounded-lg border-2 border-dashed border-primary-light/30 mt-6">
+          <p class="text-white text-lg font-semibold mb-2">No hay comentarios aún</p>
+          <p class="text-primary-light text-sm">¡Sé el primero en comentar sobre este vehículo!</p>
         </div>
       `;
     }
 
     return `
-      <div class="flex flex-col gap-4" data-comments-list>
+      <div class="flex flex-col gap-4 mt-6" data-comments-list>
         ${this.comments.map(comment => this._renderComment(comment)).join('')}
       </div>
     `;
@@ -119,12 +121,26 @@ export class CommentsSection {
    * @returns {string}
    */
   _renderComment(comment) {
+    const date = new Date(comment.createdAt);
+    const formattedDate = date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
     return `
-      <div class="comment-item pb-4 border-b border-solid border-b-primary-medium" data-comment-id="${comment.id}">
-        <p class="text-white text-sm font-bold leading-normal mb-1">
-          ${comment.name}
-        </p>
-        <p class="text-primary-light text-sm font-normal leading-normal">
+      <div class="comment-item p-4 bg-primary-dark rounded-lg border border-primary-light/20" data-comment-id="${comment.id}">
+        <div class="flex items-start justify-between mb-2">
+          <p class="text-white text-base font-bold">
+            ${comment.name}
+          </p>
+          <p class="text-primary-light text-xs font-mono">
+            ${formattedDate}
+          </p>
+        </div>
+        <p class="text-white text-sm leading-relaxed">
           ${comment.text}
         </p>
       </div>
@@ -162,7 +178,7 @@ export class CommentsSection {
 
     // Validar que hay texto
     if (!commentData.text || commentData.text.trim() === '') {
-      alert('❌ Por favor escribe un comentario');
+      console.warn('Por favor escribe un comentario');
       return;
     }
 
@@ -177,8 +193,8 @@ export class CommentsSection {
       // Enviar comentario al backend
       const newComment = await commentService.create(this.vehicleId, commentData);
       
-      // Agregar comentario a la lista local
-      this.comments.push(newComment);
+  // Agregar comentario a la lista local
+  this.comments.push(newComment);
 
       // Limpiar formulario
       form.reset();
@@ -195,11 +211,10 @@ export class CommentsSection {
         }
       }
 
-      console.log('✅ Comentario publicado correctamente');
+  // Comentario publicado correctamente (no logging)
       
     } catch (error) {
-      console.error('❌ Error publicando comentario:', error);
-      alert('❌ Error al publicar comentario. Por favor intenta nuevamente.');
+      console.error('Error publicando comentario:', error);
     } finally {
       // Restaurar botón
       submitBtn.disabled = false;
