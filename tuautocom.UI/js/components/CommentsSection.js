@@ -39,7 +39,7 @@ export class CommentsSection {
     
     section.innerHTML = `
       <h3 class="text-white text-2xl font-bold leading-tight tracking-[-0.015em] pb-6 border-b border-primary-light/30">
-        💬 Comentarios (${this.comments.length})
+        Comentarios (${this.comments.length})
       </h3>
       
       <!-- Formulario de comentarios -->
@@ -86,7 +86,7 @@ export class CommentsSection {
           type="submit"
           class="self-start px-6 py-3 bg-success hover:bg-success-hover text-white font-bold rounded-lg transition-colors"
         >
-          <span class="truncate">📝 Publicar comentario</span>
+          <span class="truncate">Publicar comentario</span>
         </button>
       </form>
     `;

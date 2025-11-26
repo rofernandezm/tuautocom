@@ -97,10 +97,16 @@ export class HomeView {
       const query = event?.detail?.query || '';
       
       if (!query) {
-        // Si no hay query, ocultar sección de resultados
+        // Si no hay query, restaurar carousels originales
         if (this._searchResultsSection) {
           this._searchResultsSection.remove();
           this._searchResultsSection = null;
+        }
+        
+        // Limpiar y renderizar carousels originales
+        if (this._contentContainer) {
+          this._contentContainer.innerHTML = '';
+          this._renderCarousels(this._contentContainer);
         }
         return;
       }

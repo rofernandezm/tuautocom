@@ -115,16 +115,6 @@ export async function getVehicleById(req, res, next) {
 // Crear un nuevo vehículo
 export async function createVehicle(req, res, next) {
   try {
-  // Creando vehículo (documento)
-    
-    // DEBUG: mostrar todo el contenido de req.files si existe
-    if (req.files) {
-  // Archivos detallados:
-      req.files.forEach((f, i) => {
-  // Detalle archivo: [${i}] ${f.originalname}
-      });
-    }
-    
     // Parsear datos del vehículo desde FormData
     let vehicleData = {};
     
@@ -146,21 +136,28 @@ export async function createVehicle(req, res, next) {
     // Procesar archivos de imágenes (multer los coloca en req.files)
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       vehicleData.images = req.files.map(file => `/uploads/${file.filename}`);
-  // Imágenes guardadas: check vehicleData.images
     } else {
-      // Si no hay imágenes, inicializar como array vacío
       vehicleData.images = [];
-  // Sin imágenes en este vehículo
     }
     
     // Crear el vehículo en MongoDB
     const created = await Vehicle.create(vehicleData);
-  // Vehículo creado: ${created._id}
     
     res.status(201).json(created);
   } catch (err) {
     console.error('❌ Error al crear vehículo:', err.message);
-    console.error('Stack:', err.stack);
+    
+    // Si es error de validación de Mongoose, mostrar detalles
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ 
+        error: 'Error de validación', 
+        details: Object.keys(err.errors).map(key => ({
+          field: key,
+          message: err.errors[key].message
+        }))
+      });
+    }
+    
     next(err);
   }
 }

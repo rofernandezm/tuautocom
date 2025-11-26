@@ -76,8 +76,8 @@ export class AdminVehicleFormView {
     const view = document.createElement('div');
     view.className = 'min-h-screen bg-primary-dark';
 
-    // Header
-    const header = new Header();
+    // Header (sin buscador - formulario de administración)
+    const header = new Header({ showSearch: false });
     view.appendChild(header.render());
 
     // Contenido principal
@@ -219,6 +219,126 @@ export class AdminVehicleFormView {
                 <option value="" disabled selected>Seleccione la categoría</option>
                 ${this._renderCatalogOptions('categories')}
               </select>
+            </label>
+          </div>
+
+          <!-- ═══════════════════════════════════════════════════════════ -->
+          <!-- ESPECIFICACIONES OPCIONALES -->
+          <!-- ═══════════════════════════════════════════════════════════ -->
+
+          <!-- Transmisión (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Transmisión (opcional)</p>
+              <select
+                name="transmission"
+                class="form-field-select"
+                data-catalog="transmissions"
+              >
+                <option value="">No especificado</option>
+                ${this._renderCatalogOptions('transmissions')}
+              </select>
+            </label>
+          </div>
+
+          <!-- Color (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Color (opcional)</p>
+              <select
+                name="color"
+                class="form-field-select"
+                data-catalog="colors"
+              >
+                <option value="">No especificado</option>
+                ${this._renderCatalogOptions('colors')}
+              </select>
+            </label>
+          </div>
+
+          <!-- Tracción (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Tracción (opcional)</p>
+              <select
+                name="traction"
+                class="form-field-select"
+                data-catalog="tractions"
+              >
+                <option value="">No especificado</option>
+                ${this._renderCatalogOptions('tractions')}
+              </select>
+            </label>
+          </div>
+
+          <!-- Motor (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Motor (opcional)</p>
+              <input
+                type="text"
+                name="motor"
+                placeholder="Ej: 2.0L Turbo, V6 3.5L"
+                class="form-field-input"
+                value="${this.vehicle?.specs?.motor || ''}"
+              />
+            </label>
+          </div>
+
+          <!-- Versión (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Versión (opcional)</p>
+              <input
+                type="text"
+                name="version"
+                placeholder="Ej: Limited, Sport, GT"
+                class="form-field-input"
+                value="${this.vehicle?.specs?.version || ''}"
+              />
+            </label>
+          </div>
+
+          <!-- ═══════════════════════════════════════════════════════════ -->
+          <!-- CONDICIÓN DEL VEHÍCULO (opcional) -->
+          <!-- ═══════════════════════════════════════════════════════════ -->
+
+          <!-- Estado Exterior (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Estado Exterior (opcional)</p>
+              <textarea
+                name="exterior"
+                placeholder="Describe el estado de la pintura, carrocería, etc."
+                class="form-field-textarea"
+                rows="2"
+              >${this.vehicle?.condition?.exterior || ''}</textarea>
+            </label>
+          </div>
+
+          <!-- Estado Interior (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Estado Interior (opcional)</p>
+              <textarea
+                name="interior"
+                placeholder="Describe el estado de los asientos, tablero, etc."
+                class="form-field-textarea"
+                rows="2"
+              >${this.vehicle?.condition?.interior || ''}</textarea>
+            </label>
+          </div>
+
+          <!-- Estado Mecánico (opcional) -->
+          <div class="form-field-container">
+            <label class="flex flex-col min-w-40 flex-1">
+              <p class="form-label">Estado Mecánico (opcional)</p>
+              <textarea
+                name="mechanics"
+                placeholder="Describe el estado del motor, frenos, suspensión, etc."
+                class="form-field-textarea"
+                rows="2"
+              >${this.vehicle?.condition?.mechanics || ''}</textarea>
             </label>
           </div>
 
@@ -432,41 +552,70 @@ export class AdminVehicleFormView {
     // ⚠️ NO usar new FormData(form) porque incluiría el input file con nombres solamente
     // En su lugar, extraer campos manualmente
     
-    // Extraer valores del formulario manualmente (sin el input file)
-    const getBrandValue = () => form.querySelector('[name="brand"]').value;
-    const getModelValue = () => form.querySelector('[name="model"]').value;
-    const getYearValue = () => form.querySelector('[name="year"]').value;
-    const getPriceValue = () => form.querySelector('[name="price"]').value;
-    const getMileageValue = () => form.querySelector('[name="mileage"]').value;
-    const getFuelValue = () => form.querySelector('[name="fuel"]').value;
-    const getCategoryValue = () => form.querySelector('[name="category"]').value;
-    const getDescriptionValue = () => form.querySelector('[name="description"]').value;
+    // Helper para obtener valor o null si está vacío (aprovecha MongoDB flexibilidad)
+    const getValueOrNull = (name) => {
+      const value = form.querySelector(`[name="${name}"]`)?.value?.trim();
+      return value || null;
+    };
+    
+    // Helper para obtener el LABEL de un selector de catálogo (en lugar del id)
+    const getCatalogLabel = (name) => {
+      const selectElement = form.querySelector(`[name="${name}"]`);
+      if (!selectElement || !selectElement.value) return null;
+      
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      return selectedOption ? selectedOption.text : null;
+    };
+    
+    // Campos requeridos
+    const brand = getCatalogLabel('brand'); // Obtener label capitalizado, no id
+    const model = form.querySelector('[name="model"]').value;
+    const year = parseInt(form.querySelector('[name="year"]').value, 10);
+    const price = parseFloat(form.querySelector('[name="price"]').value);
+    const mileage = parseInt(form.querySelector('[name="mileage"]')?.value || '0', 10);
+    const fuel = getCatalogLabel('fuel'); // Obtener label capitalizado
+    const category = getCatalogLabel('category'); // Obtener label capitalizado
+    const description = form.querySelector('[name="description"]')?.value?.trim() || '';
+    
+    // Campos opcionales - obtener labels de catálogos
+    const transmission = getCatalogLabel('transmission');
+    const motor = getValueOrNull('motor');
+    const version = getValueOrNull('version');
+    const color = getCatalogLabel('color');
+    const traction = getCatalogLabel('traction');
+    const exterior = getValueOrNull('exterior');
+    const interior = getValueOrNull('interior');
+    const mechanics = getValueOrNull('mechanics');
+    
+    // Construir specs - solo incluir campos con valor
+    const specs = { fuel };
+    if (transmission) specs.transmission = transmission;
+    if (motor) specs.motor = motor;
+    if (version) specs.version = version;
+    if (color) specs.color = color;
+    if (traction) specs.traction = traction;
+    
+    // Construir condition - solo incluir campos con valor
+    const condition = {
+      use: mileage === 0 ? 'new' : 'used'
+    };
+    if (exterior) condition.exterior = exterior;
+    if (interior) condition.interior = interior;
+    if (mechanics) condition.mechanics = mechanics;
     
     // Construir datos del vehículo (SIN imágenes - se enviarán aparte)
     // 📝 NOTA: Las imágenes se envían vía multer en FormData, no en JSON
     const vehicleData = {
-      title: `${getBrandValue()} ${getModelValue()} ${getYearValue()}`,
-      description: getDescriptionValue(),
-      category: getCategoryValue(),
-      brand: getBrandValue(),
-      model: getModelValue(),
-      year: parseInt(getYearValue(), 10),
-      price: parseFloat(getPriceValue()),
-      mileage: getMileageValue() ? parseInt(getMileageValue(), 10) : 0,
-      specs: {
-        fuel: getFuelValue(),
-        transmission: 'Automática', // TODO: Agregar campo al formulario
-        motor: '', // TODO: Agregar campo al formulario
-        version: '', // TODO: Agregar campo al formulario
-        color: '', // TODO: Agregar campo al formulario
-        traction: '' // TODO: Agregar campo al formulario
-      },
-      condition: {
-        use: !getMileageValue() || getMileageValue() === '0' ? 'new' : 'used',
-        exterior: '', // TODO: Agregar campo al formulario
-        interior: '', // TODO: Agregar campo al formulario
-        mechanics: '' // TODO: Agregar campo al formulario
-      },
+      title: `${brand} ${model} ${year}`, // brand ya viene capitalizado de getCatalogLabel()
+      description,
+      category,
+      brand, // Guardar brand capitalizado tal como viene del catálogo
+      model,
+      year,
+      price,
+      mileage,
+      specs,
+      condition
       // NO incluir images aquí - se manejan vía multer en FormData
     };
 

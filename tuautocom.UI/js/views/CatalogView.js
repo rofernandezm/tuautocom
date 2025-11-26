@@ -27,6 +27,8 @@ export class CatalogView {
     this.currentSort = 'priceAsc';
     this.currentFilters = {};
     this.searchQuery = ''; // Búsqueda actual
+    // Binding para evento de búsqueda
+    this._onSearchInputBound = (event) => this._onSearchInput(event);
   }
 
   /**
@@ -73,6 +75,9 @@ export class CatalogView {
       ]
     });
     this.container.appendChild(header.render());
+
+    // Escuchar búsquedas emitidas por Header
+    document.addEventListener('search-input', this._onSearchInputBound);
 
     // Contenedor principal con sidebar + content
     const mainContainer = document.createElement('div');
@@ -362,9 +367,50 @@ export class CatalogView {
   }
 
   /**
+   * Handler del evento 'search-input' emitido por Header (búsqueda en tiempo real)
+   * Filtra vehículos localmente por título y descripción
+   * @private
+   * @param {CustomEvent} event
+   */
+  async _onSearchInput(event) {
+    try {
+      const query = event?.detail?.query || '';
+      this.searchQuery = query;
+      
+      if (!query) {
+        // Si no hay query, restaurar vehículos filtrados originales
+        this.filteredVehicles = [...this.vehicles];
+        this._applySorting();
+        this._updateCatalogContent();
+        return;
+      }
+
+      // Filtrar vehículos por título y descripción
+      const q = query.toLowerCase();
+      this.filteredVehicles = this.vehicles.filter(v => {
+        const title = (v.title || '').toLowerCase();
+        const desc = (v.description || '').toLowerCase();
+        return title.includes(q) || desc.includes(q);
+      });
+
+      // Aplicar ordenamiento
+      this._applySorting();
+      
+      // Resetear a página 1 y actualizar vista
+      this.currentPage = 1;
+      this._updateCatalogContent();
+    } catch (error) {
+      console.error('Error al procesar la búsqueda en CatalogView:', error);
+    }
+  }
+
+  /**
    * Limpia recursos de la vista
    */
   destroy() {
+    // Remover listener de búsqueda
+    document.removeEventListener('search-input', this._onSearchInputBound);
+    
     if (this.container && this.container.remove) {
       this.container.remove();
     }

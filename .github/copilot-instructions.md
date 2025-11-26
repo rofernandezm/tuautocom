@@ -1,5 +1,24 @@
 # TuAutoCom - AI Coding Agent Instructions
 
+## ⚠️ CRITICAL: Terminal Usage Rules
+
+**NUNCA ejecutar comandos en terminales que estén corriendo servicios activos (backend o frontend).**
+
+### Reglas obligatorias:
+1. **ANTES de ejecutar cualquier comando**, verificar qué terminales están ocupadas
+2. **NUNCA interrumpir** procesos de servidores en ejecución (frontend puerto 8000, backend puerto 8001)
+3. **Si necesitas ejecutar un comando**, usa una terminal DIFERENTE o solicita al usuario que lo haga manualmente
+4. **Los servidores long-running NUNCA deben ser detenidos** con comandos adicionales en la misma terminal
+
+### Servidores que NO deben interrumpirse:
+- `pnpm start` (frontend - puerto 8000)
+- `pnpm run dev` (backend - puerto 8001)
+- `pnpm run dev` (tuautocom.UI - watch mode CSS)
+
+**Consecuencia de violar esta regla**: El usuario tendrá que reiniciar manualmente los servicios, perdiendo tiempo y causando frustración.
+
+---
+
 ## Project Overview
 
 TuAutoCom is a vehicle catalog web application (buy/sell cars) with a **monorepo structure** containing three distinct frontend implementations and one backend API. All projects use **pnpm** as package manager and ES Modules (`"type": "module"`).

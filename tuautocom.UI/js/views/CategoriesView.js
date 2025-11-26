@@ -19,6 +19,8 @@ export class CategoriesView {
     this.allVehicles = [];
     this.filteredVehicles = [];
     this.activeCategory = 'all';
+    // Binding para evento de búsqueda
+    this._onSearchInputBound = (event) => this._onSearchInput(event);
   }
 
   /**
@@ -55,6 +57,9 @@ export class CategoriesView {
     // Header
     const header = new Header();
     this.container.appendChild(header.render());
+
+    // Escuchar búsquedas emitidas por Header
+    document.addEventListener('search-input', this._onSearchInputBound);
 
     // Main content
     const main = document.createElement('main');
@@ -148,9 +153,45 @@ export class CategoriesView {
   }
 
   /**
+   * Handler del evento 'search-input' emitido por Header (búsqueda en tiempo real)
+   * @private
+   * @param {CustomEvent} event
+   */
+  async _onSearchInput(event) {
+    try {
+      const query = event?.detail?.query || '';
+      
+      if (!query) {
+        // Restaurar vehículos filtrados por categoría activa
+        this._onFilterChange(this.activeCategory);
+        return;
+      }
+
+      // Filtrar por búsqueda dentro de la categoría activa
+      const baseVehicles = this.activeCategory === 'all' 
+        ? this.allVehicles 
+        : this.allVehicles.filter(v => v.category === this.activeCategory);
+
+      const q = query.toLowerCase();
+      this.filteredVehicles = baseVehicles.filter(v => {
+        const title = (v.title || '').toLowerCase();
+        const desc = (v.description || '').toLowerCase();
+        return title.includes(q) || desc.includes(q);
+      });
+
+      this._renderVehicleGrid();
+    } catch (error) {
+      console.error('Error al procesar la búsqueda en CategoriesView:', error);
+    }
+  }
+
+  /**
    * Destruye la vista
    */
   destroy() {
+    // Remover listener de búsqueda
+    document.removeEventListener('search-input', this._onSearchInputBound);
+    
     // Limpiar referencias
     this.container = null;
     this._contentContainer = null;

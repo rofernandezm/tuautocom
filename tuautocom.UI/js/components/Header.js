@@ -274,11 +274,20 @@ export class Header {
     if (searchBtn && searchContainer) {
       // Toggle del contenedor al hacer click en el botón de búsqueda
       searchBtn.addEventListener('click', () => {
+        const wasHidden = searchContainer.classList.contains('hidden');
         searchContainer.classList.toggle('hidden');
         
-        // Si se muestra, enfocar el input
-        if (!searchContainer.classList.contains('hidden')) {
+        if (wasHidden) {
+          // Si se abre, enfocar el input
           searchInput.focus();
+        } else {
+          // Si se cierra, limpiar búsqueda y emitir evento
+          if (searchInput.value) {
+            searchInput.value = '';
+            this._handleSearchInput('');
+            const clearBtn = header.querySelector('[data-action="search-clear"]');
+            if (clearBtn) clearBtn.style.opacity = '0';
+          }
         }
       });
     }

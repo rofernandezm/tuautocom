@@ -11,6 +11,7 @@ import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import { ContactModal } from '../components/ContactModal.js';
 import { CommentsSection } from '../components/CommentsSection.js';
+import { Breadcrumb } from '../components/Breadcrumb.js';
 import { vehicleService } from '../services/vehicleService.js';
 
 export class VehicleDetailView {
@@ -19,7 +20,7 @@ export class VehicleDetailView {
     this.vehicle = null;
     this.container = null;
     this.currentImageIndex = 0;
-    this.specsExpanded = false; // Estado para toggle de especificaciones
+    this.specsExpanded = true; // 📝 CAMBIO: Especificaciones expandidas por defecto
     this.commentsSection = null; // Referencia a CommentsSection
   }
 
@@ -51,8 +52,8 @@ export class VehicleDetailView {
     this.container = document.createElement('div');
     this.container.className = 'relative flex flex-col min-h-screen w-full bg-primary-dark text-white';
 
-    // Header
-    const header = new Header();
+    // Header (sin buscador - vista de detalle)
+    const header = new Header({ showSearch: false });
     this.container.appendChild(header.render());
 
     // Contenido principal
@@ -109,30 +110,23 @@ export class VehicleDetailView {
     const contentContainer = document.createElement('div');
     contentContainer.className = 'flex flex-col max-w-[960px] flex-1';
 
-    // Botón volver al listado (mejora UX)
-    contentContainer.innerHTML += `
-      <div class="px-4 py-3">
-        <button 
-          data-action="back-to-list" 
-          class="inline-flex items-center gap-2 rounded-lg bg-[#214a3c] px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2f6a55] focus:outline-none focus:ring-2 focus:ring-[#8ecdb7] focus:ring-offset-2 transition-all duration-200"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-          Volver al catálogo
-        </button>
-      </div>
-    `;
+    // Breadcrumb de navegación
+    const breadcrumb = new Breadcrumb([
+      { label: 'Inicio', href: '#' },
+      { label: 'Catálogo', href: '#catalog' },
+      { label: this.vehicle.title } // Página actual
+    ]);
+    contentContainer.appendChild(breadcrumb.render());
 
     // Carrusel de imágenes
     contentContainer.appendChild(this._renderImageCarousel());
 
     // Título y precio
     contentContainer.innerHTML += `
-      <h2 class="text-white tracking-light text-[28px] font-bold leading-tight px-4 text-left pb-3 pt-5">
+      <h2 class="text-white tracking-light text-3xl font-bold leading-tight px-4 text-left pb-3 pt-5">
         ${this.vehicle.title}
       </h2>
-      <p class="text-primary-light text-sm font-normal leading-normal pb-3 pt-1 px-4">
+      <p class="text-primary-light text-xl font-semibold leading-normal pb-3 pt-1 px-4">
         Desde $${this.vehicle.price.toLocaleString()}
       </p>
     `;
@@ -169,7 +163,7 @@ export class VehicleDetailView {
     actionContainer.className = 'flex px-4 py-3 justify-start';
     actionContainer.innerHTML = `
       <button
-        class="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 bg-[#019863] text-white text-sm font-semibold shadow-md hover:bg-[#017a4f] focus:outline-none focus:ring-2 focus:ring-[#019863] focus:ring-offset-2 transition-all duration-200"
+        class="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 bg-[#019863] text-white text-base font-semibold shadow-md hover:bg-[#017a4f] focus:outline-none focus:ring-2 focus:ring-[#019863] focus:ring-offset-2 transition-all duration-200"
         data-action="request-info"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,7 +276,7 @@ export class VehicleDetailView {
           data-specs-toggle
           class="w-full flex items-center justify-between py-2 cursor-pointer group"
         >
-          <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
+          <h2 class="text-white text-2xl font-bold leading-tight tracking-[-0.015em]">
             Especificaciones
           </h2>
           <svg 
@@ -299,18 +293,47 @@ export class VehicleDetailView {
         <!-- Grid de especificaciones (colapsable) -->
         <div 
           data-specs-content
-          class="grid grid-cols-2 overflow-hidden transition-all duration-300 ${this.specsExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}"
+          class="grid grid-cols-2 overflow-hidden transition-all duration-300 ${this.specsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}"
         >
-          ${this._renderSpecRow('Marca', this.vehicle.brand?.charAt(0).toUpperCase() + this.vehicle.brand?.slice(1) || 'N/A')}
+          ${this._renderSpecRow('Marca', this._capitalize(this.vehicle.brand) || 'N/A')}
+          ${this._renderSpecRow('Modelo', this._capitalize(this.vehicle.model) || 'N/A')}
           ${this._renderSpecRow('Año', this.vehicle.year || 'N/A')}
-          ${this._renderSpecRow('Tipo', this._formatType(this.vehicle.category))}
-          ${this._renderSpecRow('Combustible', this._formatFuel(this.vehicle.fuel))}
-          ${this._renderSpecRow('Kilometraje', `${this.vehicle.mileage.toLocaleString()} km`)}
+          ${this._renderSpecRow('Categoría', this._formatType(this.vehicle.category))}
+          ${this._renderSpecRow('Combustible', this._formatFuel(this.vehicle.specs?.fuel || this.vehicle.fuel))}
+          ${this._renderSpecRow('Kilometraje', `${(this.vehicle.mileage || 0).toLocaleString()} km`)}
           ${this._renderSpecRow('Precio', `$${this.vehicle.price.toLocaleString()}`)}
+          ${this._renderSpecRow('Condición', this.vehicle.condition?.use === 'new' ? 'Nuevo' : 'Usado')}
+          
+          <!-- Especificaciones opcionales (solo si existen) -->
+          ${this.vehicle.specs?.transmission ? this._renderSpecRow('Transmisión', this._capitalize(this.vehicle.specs.transmission)) : ''}
+          ${this.vehicle.specs?.motor ? this._renderSpecRow('Motor', this.vehicle.specs.motor) : ''}
+          ${this.vehicle.specs?.version ? this._renderSpecRow('Versión', this.vehicle.specs.version) : ''}
+          ${this.vehicle.specs?.color ? this._renderSpecRow('Color', this._capitalize(this.vehicle.specs.color)) : ''}
+          ${this.vehicle.specs?.traction ? this._renderSpecRow('Tracción', this.vehicle.specs.traction.toUpperCase()) : ''}
+        </div>
+        
+        <!-- Condición del vehículo (si existe algún campo) -->
+        ${this._renderConditionSection()}
         </div>
       </div>
     `;
     return specsContainer;
+  }
+
+  /**
+   * Capitaliza una cadena de texto (primera letra mayúscula)
+   * @private
+   * @param {string} text - Texto a capitalizar
+   * @returns {string} Texto capitalizado
+   */
+  _capitalize(text) {
+    if (!text || typeof text !== 'string') return text;
+    
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   /**
@@ -326,6 +349,48 @@ export class VehicleDetailView {
       <div class="flex flex-col gap-1 border-t border-solid border-t-primary-medium py-4 ${isLeft ? 'pr-2' : 'pl-2'}">
         <p class="text-primary-light text-sm font-normal leading-normal">${label}</p>
         <p class="text-white text-sm font-normal leading-normal">${value}</p>
+      </div>
+    `;
+  }
+
+  /**
+   * Renderiza sección de condición del vehículo (solo si hay datos)
+   * @private
+   * @returns {string} HTML de la sección o string vacío
+   */
+  _renderConditionSection() {
+    const hasConditionData = 
+      this.vehicle.condition?.exterior || 
+      this.vehicle.condition?.interior || 
+      this.vehicle.condition?.mechanics;
+    
+    if (!hasConditionData) return '';
+    
+    return `
+      <div class="mt-6 pt-4 border-t border-solid border-t-primary-medium">
+        <h3 class="text-white text-lg font-bold leading-tight mb-3">
+          Estado del Vehículo
+        </h3>
+        <div class="flex flex-col gap-3">
+          ${this.vehicle.condition?.exterior ? `
+            <div class="flex flex-col gap-1">
+              <p class="text-primary-light text-sm font-semibold">Exterior</p>
+              <p class="text-white text-sm leading-normal">${this.vehicle.condition.exterior}</p>
+            </div>
+          ` : ''}
+          ${this.vehicle.condition?.interior ? `
+            <div class="flex flex-col gap-1">
+              <p class="text-primary-light text-sm font-semibold">Interior</p>
+              <p class="text-white text-sm leading-normal">${this.vehicle.condition.interior}</p>
+            </div>
+          ` : ''}
+          ${this.vehicle.condition?.mechanics ? `
+            <div class="flex flex-col gap-1">
+              <p class="text-primary-light text-sm font-semibold">Mecánica</p>
+              <p class="text-white text-sm leading-normal">${this.vehicle.condition.mechanics}</p>
+            </div>
+          ` : ''}
+        </div>
       </div>
     `;
   }
@@ -394,16 +459,6 @@ export class VehicleDetailView {
     }
     if (nextBtn) {
       nextBtn.addEventListener('click', () => this._nextImage());
-    }
-
-    // Botón volver al listado
-    const backBtn = this.container.querySelector('[data-action="back-to-list"]');
-    if (backBtn) {
-      backBtn.addEventListener('click', (e) => {
-        // Navegación hash hacia catálogo
-        e.preventDefault();
-        window.location.hash = '#catalog';
-      });
     }
 
     // Toggle de especificaciones (NUEVO - Vanilla JS, NO Alpine.js)
@@ -487,11 +542,11 @@ export class VehicleDetailView {
     if (this.specsExpanded) {
       // Expandir
       content.classList.remove('max-h-0', 'opacity-0');
-      content.classList.add('max-h-96', 'opacity-100');
+      content.classList.add('max-h-[1000px]', 'opacity-100');
       icon.classList.add('rotate-180');
     } else {
       // Colapsar
-      content.classList.remove('max-h-96', 'opacity-100');
+      content.classList.remove('max-h-[1000px]', 'opacity-100');
       content.classList.add('max-h-0', 'opacity-0');
       icon.classList.remove('rotate-180');
     }

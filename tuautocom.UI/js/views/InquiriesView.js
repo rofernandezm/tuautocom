@@ -38,8 +38,8 @@ export class InquiriesView {
     const view = document.createElement('div');
     view.className = 'min-h-screen bg-primary-dark';
 
-    // Header
-    const header = new Header();
+    // Header (sin buscador - vista de solo visualización)
+    const header = new Header({ showSearch: false });
     view.appendChild(header.render());
 
     // Contenido principal

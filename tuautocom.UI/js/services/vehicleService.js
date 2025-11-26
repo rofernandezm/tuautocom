@@ -54,9 +54,12 @@ class VehicleService {
       year: vehicle.year,
       price: vehicle.price,
       mileage: vehicle.mileage || 0,
+      // 🔧 PRESERVAR objetos completos de specs y condition
+      specs: vehicle.specs || {},
+      condition: vehicle.condition || {},
+      // Mantener campos legacy para compatibilidad
       fuel: vehicle.specs?.fuel || 'N/A',
       transmission: vehicle.specs?.transmission || 'N/A',
-      condition: vehicle.condition?.use || 'N/A',
       // Usar primera imagen con URL completa o placeholder
       image: imageUrls[0] || 'https://via.placeholder.com/400x300?text=Sin+Imagen',
       images: imageUrls,
@@ -115,8 +118,8 @@ class VehicleService {
     } catch (error) {
       console.error('Error obteniendo vehículos desde API:', error);
       return {
-        data: this.mockVehicles,
-        pagination: { page: 1, limit: 12, total: this.mockVehicles.length, pages: 1 }
+        data: [], // No usar datos mock - retornar array vacío
+        pagination: { page: 1, limit: 12, total: 0, pages: 0 }
       };
     }
   }
@@ -132,8 +135,7 @@ class VehicleService {
       return this._mapVehicle(vehicle);
     } catch (error) {
       console.error(`Error obteniendo vehículo ${id}:`, error);
-      // Fallback a datos mock
-      return this.mockVehicles.find(v => v.id === id) || null;
+      return null; // No usar datos mock - retornar null si falla
     }
   }
 

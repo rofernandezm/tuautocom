@@ -100,7 +100,23 @@ catalogSchema.statics.getByType = async function(type) {
 // Método estático para obtener todos los items de un catálogo
 catalogSchema.statics.getItems = async function(type) {
   const catalog = await this.findOne({ type });
-  return catalog ? catalog.items.filter(item => item.metadata.active !== false) : [];
+  if (!catalog) return [];
+  
+  // Filtrar items activos y convertir a plain objects inmediatamente
+  const activeItems = catalog.items
+    .filter(item => item.metadata.active !== false)
+    .map(item => item.toObject ? item.toObject() : item);
+  
+  // Ordenar alfabéticamente por label (ignoramos metadata.order por ahora)
+  // TODO: Implementar metadata.order solo cuando los valores sean significativos
+  return activeItems.sort((a, b) => {
+    const labelA = (a.label || '').toLowerCase();
+    const labelB = (b.label || '').toLowerCase();
+    
+    if (labelA < labelB) return -1;
+    if (labelA > labelB) return 1;
+    return 0;
+  });
 };
 
 // Método para agregar un item al catálogo
