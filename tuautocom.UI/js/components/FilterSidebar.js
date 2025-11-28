@@ -3,12 +3,12 @@
  * Panel lateral con filtros avanzados para catálogo de vehículos
  * 
  * 📝 NOTA EDUCATIVA:
- * Los filtros son dinámicos - se extraen de los datos de vehículos del servicio.
- * Esto simula cómo MongoDB permitiría obtener valores únicos con aggregation pipeline.
+ * Los filtros se cargan dinámicamente desde los catálogos de MongoDB.
+ * Esto demuestra cómo usar catálogos centralizados en lugar de datos hardcoded.
  * 
  * @class
  * @param {Object} options - Opciones de configuración
- * @param {Array} options.vehicles - Array de vehículos para extraer valores de filtros
+ * @param {Array} options.vehicles - Array de vehículos para calcular rangos de precio/kilometraje
  * @param {Function} options.onApply - Callback cuando se aplican los filtros
  * @param {Function} options.onClear - Callback cuando se limpian los filtros
  * 
@@ -19,14 +19,24 @@
  *   onClear: () => console.log('Limpiar')
  * });
  */
+
+import { catalogService } from '../services/catalogService.js';
+import { getCatalogLabel } from '../utils/helpers.js';
+
 export class FilterSidebar {
   constructor(options = {}) {
     this.vehicles = options.vehicles || [];
     this.onApply = options.onApply || (() => {});
     this.onClear = options.onClear || (() => {});
     
-    // Extraer valores únicos de los vehículos para los filtros
-    // 📝 NOTA: Esto simula una query de MongoDB como: db.vehicles.distinct('brand')
+    // Catálogos cargados desde backend
+    this.catalogs = {
+      categories: [],
+      brands: [],
+      fuels: []
+    };
+    
+    // Extraer rangos de precio/kilometraje de vehículos actuales
     this.filterOptions = this._extractFilterOptions();
     
     // Estado interno de filtros
@@ -42,32 +52,48 @@ export class FilterSidebar {
   }
 
   /**
-   * Extrae valores únicos de los vehículos para construir opciones de filtros
+   * Inicializa el componente cargando catálogos desde backend
+   * @async
+   */
+  async init() {
+    try {
+      // Cargar catálogos desde backend (MongoDB)
+      const [categories, brands, fuels] = await Promise.all([
+        catalogService.getItems('categories'),
+        catalogService.getItems('brands'),
+        catalogService.getItems('fuels')
+      ]);
+      
+      this.catalogs.categories = categories;
+      this.catalogs.brands = brands;
+      this.catalogs.fuels = fuels;
+    } catch (error) {
+      console.error('Error cargando catálogos en FilterSidebar:', error);
+      // Continuar con arrays vacíos - el componente extraerá de vehículos
+    }
+  }
+
+  /**
+   * Extrae rangos de precio/kilometraje y años únicos de los vehículos
    * @private
-   * @returns {Object} Objeto con arrays de opciones para cada filtro
+   * @returns {Object} Objeto con rangos y años
    * 
    * 📝 NOTA EDUCATIVA: MongoDB Equivalent
    * En MongoDB, esto sería similar a:
-   * - db.vehicles.distinct('brand')
+   * - db.vehicles.distinct('year')
    * - db.vehicles.aggregate([{ $group: { _id: null, maxPrice: { $max: '$price' }}}])
    */
   _extractFilterOptions() {
     if (this.vehicles.length === 0) {
       return {
-        brands: [],
         years: [],
-        types: [],
-        fuels: [],
         priceRange: { min: 10000, max: 100000 },
         mileageRange: { min: 0, max: 100000 }
       };
     }
 
-    // Extraer valores únicos usando Set (elimina duplicados)
-    const brands = [...new Set(this.vehicles.map(v => v.brand))].sort();
+    // Extraer años únicos
     const years = [...new Set(this.vehicles.map(v => v.year))].sort((a, b) => b - a); // Más reciente primero
-    const types = [...new Set(this.vehicles.map(v => v.category))].sort();
-    const fuels = [...new Set(this.vehicles.map(v => v.fuel))].sort();
     
     // Calcular rangos de precio y kilometraje
     const prices = this.vehicles.map(v => v.price);
@@ -83,7 +109,7 @@ export class FilterSidebar {
       max: Math.max(...mileages)
     };
 
-    return { brands, years, types, fuels, priceRange, mileageRange };
+    return { years, priceRange, mileageRange };
   }
 
   /**
@@ -108,8 +134,8 @@ export class FilterSidebar {
             data-filter="brand"
           >
             <option value="all">Todas las marcas</option>
-            ${this.filterOptions.brands.map(brand => `
-              <option value="${brand}">${brand.charAt(0).toUpperCase() + brand.slice(1)}</option>
+            ${this.catalogs.brands.map(brand => `
+              <option value="${brand.id}">${brand.label}</option>
             `).join('')}
           </select>
         </label>
@@ -175,8 +201,8 @@ export class FilterSidebar {
             data-filter="type"
           >
             <option value="all">Todos los tipos</option>
-            ${this.filterOptions.types.map(type => `
-              <option value="${type}">${this._formatTypeLabel(type)}</option>
+            ${this.catalogs.categories.map(cat => `
+              <option value="${cat.id}">${cat.label}</option>
             `).join('')}
           </select>
         </label>
@@ -191,9 +217,12 @@ export class FilterSidebar {
             data-filter="fuel"
           >
             <option value="all">Todos los combustibles</option>
-            ${this.filterOptions.fuels.map(fuel => `
-              <option value="${fuel}">${this._formatFuelLabel(fuel)}</option>
+            ${this.catalogs.fuels.map(fuel => `
+              <option value="${fuel.id}">${fuel.label}</option>
             `).join('')}
+          </select>
+        </label>
+      </div>
           </select>
         </label>
       </div>
@@ -340,39 +369,5 @@ export class FilterSidebar {
     const mileageDisplay = element.querySelector('[data-mileage-value]');
     if (mileageSlider) mileageSlider.value = this.filterOptions.mileageRange.max;
     if (mileageDisplay) mileageDisplay.textContent = `${this.filterOptions.mileageRange.max.toLocaleString()} km`;
-  }
-
-  /**
-   * Formatea el label de tipo de vehículo
-   * @private
-   * @param {string} type
-   * @returns {string}
-   */
-  _formatTypeLabel(type) {
-    const labels = {
-      'sedan': 'Sedán',
-      'suv': 'SUV',
-      'pickup': 'Pick-up',
-      'electric': 'Eléctrico',
-      'hatchback': 'Hatchback',
-      'coupe': 'Coupé'
-    };
-    return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
-  }
-
-  /**
-   * Formatea el label de combustible
-   * @private
-   * @param {string} fuel
-   * @returns {string}
-   */
-  _formatFuelLabel(fuel) {
-    const labels = {
-      'gasoline': 'Gasolina',
-      'diesel': 'Diésel',
-      'hybrid': 'Híbrido',
-      'electric': 'Eléctrico'
-    };
-    return labels[fuel] || fuel.charAt(0).toUpperCase() + fuel.slice(1);
   }
 }

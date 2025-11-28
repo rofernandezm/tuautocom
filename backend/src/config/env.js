@@ -23,9 +23,9 @@ if (existsSync(fullPath)) {
 
 const config = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT, 10) || 8000,
+  PORT: parseInt(process.env.PORT, 10) || 8001,
   DATABASE_URL: process.env.DATABASE_URL || 'mongodb://localhost:27017/tuautocom',
-  SECRET_KEY: process.env.SECRET_KEY || 'change_me',
+  SECRET_KEY: process.env.SECRET_KEY || '',
 };
 
 export default config;

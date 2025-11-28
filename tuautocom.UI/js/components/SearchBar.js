@@ -54,5 +54,10 @@ export class SearchBar {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') submit();
     });
+    
+    // Escuchar el evento nativo 'search' del input (cuando se presiona la X para limpiar)
+    input.addEventListener('search', () => {
+      submit(); // Emitir nuestro evento personalizado con el valor actualizado
+    });
   }
 }

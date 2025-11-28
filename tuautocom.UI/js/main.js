@@ -69,7 +69,7 @@ async function navigateTo(route) {
   // Cargando CatalogView
       currentView = new CatalogView();
       await currentView.init();
-      appContainer.appendChild(currentView.render());
+      appContainer.appendChild(await currentView.render());
   // CatalogView montada
       break;
       

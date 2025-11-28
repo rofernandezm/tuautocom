@@ -97,27 +97,62 @@ catalogSchema.statics.getByType = async function(type) {
   return await this.findOne({ type });
 };
 
-// Método estático para obtener todos los items de un catálogo
+/**
+ * Obtiene los items de un catálogo por tipo.
+ * Se utiliza un aggregation pipeline para:
+ * - Filtrar items inactivos (soft-delete)
+ * - Ordenar por metadata.order y por label (alfabético)
+ * - Evitar ordenar en memoria del servidor de la app
+ *
+ * NOTAS:
+ * - Ventaja: menos uso de memoria y posibilidad de aprovechar índices.
+ */
 catalogSchema.statics.getItems = async function(type) {
-  const catalog = await this.findOne({ type });
-  if (!catalog) return [];
-  
-  // Filtrar items activos y convertir a plain objects inmediatamente
-  const activeItems = catalog.items
-    .filter(item => item.metadata.active !== false)
-    .map(item => item.toObject ? item.toObject() : item);
-  
-  // Ordenar alfabéticamente por label (ignoramos metadata.order por ahora)
-  // TODO: Implementar metadata.order solo cuando los valores sean significativos
-  return activeItems.sort((a, b) => {
-    const labelA = (a.label || '').toLowerCase();
-    const labelB = (b.label || '').toLowerCase();
-    
-    if (labelA < labelB) return -1;
-    if (labelA > labelB) return 1;
-    return 0;
-  });
+ 
+  const result = await this.aggregate([
+    { $match: { type } },
+    // Expandimos items para filtrar/ordenar correctamente
+    { $unwind: '$items' },
+    // Excluir items marcados como inactivos (soft delete)
+    { $match: { 'items.metadata.active': { $ne: false } } },
+    // Orden por label (alfabético)
+    { $sort: { 'items.label': 1 } },
+    // Reagrupar en array de items ya ordenados
+    {
+      $group: {
+        _id: '$_id',
+        items: { $push: '$items' }
+      }
+    },
+    // Proyectar solo el array de items (sin _id)
+    { $project: { _id: 0, items: 1 } }
+  ]);
+
+  if (!result || result.length === 0) return [];
+  return result[0].items;
 };
+
+// // Método estático para obtener todos los items de un catálogo
+// catalogSchema.statics.getItems = async function(type) {
+//   const catalog = await this.findOne({ type });
+//   if (!catalog) return [];
+  
+//   // Filtrar items activos y convertir a plain objects inmediatamente
+//   const activeItems = catalog.items
+//     .filter(item => item.metadata.active !== false)
+//     .map(item => item.toObject ? item.toObject() : item);
+  
+//   // Ordenar alfabéticamente por label (ignoramos metadata.order por ahora)
+//   // TODO: Implementar metadata.order solo cuando los valores sean significativos
+//   return activeItems.sort((a, b) => {
+//     const labelA = (a.label || '').toLowerCase();
+//     const labelB = (b.label || '').toLowerCase();
+    
+//     if (labelA < labelB) return -1;
+//     if (labelA > labelB) return 1;
+//     return 0;
+//   });
+// };
 
 // Método para agregar un item al catálogo
 catalogSchema.methods.addItem = function(itemData) {

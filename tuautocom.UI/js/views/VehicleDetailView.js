@@ -13,6 +13,8 @@ import { ContactModal } from '../components/ContactModal.js';
 import { CommentsSection } from '../components/CommentsSection.js';
 import { Breadcrumb } from '../components/Breadcrumb.js';
 import { vehicleService } from '../services/vehicleService.js';
+import { catalogService } from '../services/catalogService.js';
+import { getCatalogLabel, formatCatalogLabel } from '../utils/helpers.js';
 
 export class VehicleDetailView {
   constructor(vehicleId) {
@@ -22,15 +24,31 @@ export class VehicleDetailView {
     this.currentImageIndex = 0;
     this.specsExpanded = true; // 📝 CAMBIO: Especificaciones expandidas por defecto
     this.commentsSection = null; // Referencia a CommentsSection
+    
+    // Catálogos para formateo de labels
+    this.catalogs = {
+      categories: [],
+      fuels: []
+    };
   }
 
   /**
-   * Inicializa la vista cargando datos del vehículo
+   * Inicializa la vista cargando datos del vehículo y catálogos
    * @async
    */
   async init() {
     try {
-      this.vehicle = await vehicleService.getById(this.vehicleId);
+      // Cargar vehículo y catálogos en paralelo
+      const [vehicle, categories, fuels] = await Promise.all([
+        vehicleService.getById(this.vehicleId),
+        catalogService.getItems('categories'),
+        catalogService.getItems('fuels')
+      ]);
+      
+      this.vehicle = vehicle;
+      this.catalogs.categories = categories;
+      this.catalogs.fuels = fuels;
+      
       if (!this.vehicle) {
         console.error(`Vehículo con ID ${this.vehicleId} no encontrado`);
       } else {
@@ -298,8 +316,8 @@ export class VehicleDetailView {
           ${this._renderSpecRow('Marca', this._capitalize(this.vehicle.brand) || 'N/A')}
           ${this._renderSpecRow('Modelo', this._capitalize(this.vehicle.model) || 'N/A')}
           ${this._renderSpecRow('Año', this.vehicle.year || 'N/A')}
-          ${this._renderSpecRow('Categoría', this._formatType(this.vehicle.category))}
-          ${this._renderSpecRow('Combustible', this._formatFuel(this.vehicle.specs?.fuel || this.vehicle.fuel))}
+          ${this._renderSpecRow('Categoría', getCatalogLabel(this.catalogs.categories, this.vehicle.category, formatCatalogLabel(this.vehicle.category)))}
+          ${this._renderSpecRow('Combustible', getCatalogLabel(this.catalogs.fuels, this.vehicle.specs?.fuel || this.vehicle.fuel, formatCatalogLabel(this.vehicle.specs?.fuel || this.vehicle.fuel)))}
           ${this._renderSpecRow('Kilometraje', `${(this.vehicle.mileage || 0).toLocaleString()} km`)}
           ${this._renderSpecRow('Precio', `$${this.vehicle.price.toLocaleString()}`)}
           ${this._renderSpecRow('Condición', this.vehicle.condition?.use === 'new' ? 'Nuevo' : 'Usado')}
@@ -393,40 +411,6 @@ export class VehicleDetailView {
         </div>
       </div>
     `;
-  }
-
-  /**
-   * Formatea el tipo de vehículo
-   * @private
-   * @param {string} type
-   * @returns {string}
-   */
-  _formatType(type) {
-    const labels = {
-      'sedan': 'Sedán',
-      'suv': 'SUV',
-      'pickup': 'Pick-up',
-      'electric': 'Eléctrico',
-      'hatchback': 'Hatchback',
-      'coupe': 'Coupé'
-    };
-    return labels[type] || type;
-  }
-
-  /**
-   * Formatea el tipo de combustible
-   * @private
-   * @param {string} fuel
-   * @returns {string}
-   */
-  _formatFuel(fuel) {
-    const labels = {
-      'gasoline': 'Gasolina',
-      'diesel': 'Diésel',
-      'hybrid': 'Híbrido',
-      'electric': 'Eléctrico'
-    };
-    return labels[fuel] || fuel;
   }
 
   /**
@@ -557,7 +541,7 @@ export class VehicleDetailView {
    * Abre el modal de contacto con la información del vehículo
    * @private
    */
-  _handleRequestInfo() {
+  async _handleRequestInfo() {
   // Abriendo modal de contacto para vehicle id: {{this.vehicle.id}}
     
     const modal = new ContactModal({
@@ -571,7 +555,8 @@ export class VehicleDetailView {
       }
     });
 
-    // Renderizar y agregar al body
+    // Inicializar catálogos y renderizar
+    await modal.init();
     document.body.appendChild(modal.render());
   }
 

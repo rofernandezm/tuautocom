@@ -10,6 +10,8 @@
  */
 
 import { inquiryService } from '../services/inquiryService.js';
+import { catalogService } from '../services/catalogService.js';
+import { getCatalogLabel, formatCatalogLabel } from '../utils/helpers.js';
 
 export class ContactModal {
   constructor(options = {}) {
@@ -19,6 +21,12 @@ export class ContactModal {
     this.container = null;
     this.currentImageIndex = 0;
     
+    // Catálogos para formateo de labels
+    this.catalogs = {
+      categories: [],
+      fuels: []
+    };
+    
     // Obtener imágenes del vehículo (igual que VehicleDetailView)
     if (this.vehicle.images && Array.isArray(this.vehicle.images) && this.vehicle.images.length > 0) {
       this.images = this.vehicle.images;
@@ -26,6 +34,24 @@ export class ContactModal {
       this.images = [this.vehicle.image];
     } else {
       this.images = [];
+    }
+  }
+
+  /**
+   * Inicializa el componente cargando catálogos
+   * @async
+   */
+  async init() {
+    try {
+      const [categories, fuels] = await Promise.all([
+        catalogService.getItems('categories'),
+        catalogService.getItems('fuels')
+      ]);
+      
+      this.catalogs.categories = categories;
+      this.catalogs.fuels = fuels;
+    } catch (error) {
+      console.error('Error cargando catálogos en ContactModal:', error);
     }
   }
 
@@ -203,8 +229,8 @@ export class ContactModal {
       <div class="p-4 grid grid-cols-2">
         ${this._renderSpecRow('Marca', this.vehicle.brand?.charAt(0).toUpperCase() + this.vehicle.brand?.slice(1) || 'N/A', true)}
         ${this._renderSpecRow('Año', this.vehicle.year || 'N/A')}
-        ${this._renderSpecRow('Tipo', this._formatType(this.vehicle.category), true)}
-        ${this._renderSpecRow('Combustible', this._formatFuel(this.vehicle.fuel))}
+        ${this._renderSpecRow('Tipo', getCatalogLabel(this.catalogs.categories, this.vehicle.category, formatCatalogLabel(this.vehicle.category)), true)}
+        ${this._renderSpecRow('Combustible', getCatalogLabel(this.catalogs.fuels, this.vehicle.specs?.fuel || this.vehicle.fuel, formatCatalogLabel(this.vehicle.specs?.fuel || this.vehicle.fuel)))}
         ${this._renderSpecRow('Kilometraje', `${(this.vehicle.mileage || 0).toLocaleString()} km`, true)}
         ${this._renderSpecRow('Precio', `$${(this.vehicle.price || 0).toLocaleString()}`)}
       </div>
@@ -226,40 +252,6 @@ export class ContactModal {
         <p class="text-white text-sm font-normal leading-normal">${value}</p>
       </div>
     `;
-  }
-
-  /**
-   * Formatea el tipo de vehículo
-   * @private
-   * @param {string} type
-   * @returns {string}
-   */
-  _formatType(type) {
-    const labels = {
-      'sedan': 'Sedán',
-      'suv': 'SUV',
-      'pickup': 'Pick-up',
-      'electric': 'Eléctrico',
-      'hatchback': 'Hatchback',
-      'coupe': 'Coupé'
-    };
-    return labels[type] || type || 'N/A';
-  }
-
-  /**
-   * Formatea el tipo de combustible
-   * @private
-   * @param {string} fuel
-   * @returns {string}
-   */
-  _formatFuel(fuel) {
-    const labels = {
-      'gasoline': 'Gasolina',
-      'diesel': 'Diésel',
-      'hybrid': 'Híbrido',
-      'electric': 'Eléctrico'
-    };
-    return labels[fuel] || fuel || 'N/A';
   }
 
   /**

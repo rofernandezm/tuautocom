@@ -61,7 +61,7 @@ export class CatalogView {
    * Renderiza la vista completa del catálogo
    * @returns {HTMLElement}
    */
-  render() {
+  async render() {
     this.container = document.createElement('div');
     this.container.className = 'relative flex flex-col min-h-screen w-full bg-primary-dark text-white';
 
@@ -84,12 +84,13 @@ export class CatalogView {
     mainContainer.className = 'gap-1 px-6 flex flex-1 justify-center py-5';
 
     // Sidebar con filtros
-    // 📝 NOTA: Pasamos todos los vehículos para que FilterSidebar extraiga valores únicos
+    // 📝 NOTA: FilterSidebar ahora carga catálogos desde MongoDB
     const sidebar = new FilterSidebar({
       vehicles: this.vehicles,
       onApply: (filters) => this._handleFilters(filters),
       onClear: () => this._handleClearFilters()
     });
+    await sidebar.init(); // Cargar catálogos desde backend
     mainContainer.appendChild(sidebar.render());
 
     // Contenedor de contenido (catálogo)
@@ -118,7 +119,10 @@ export class CatalogView {
     searchContainer.appendChild(searchBar.render());
     
     // Escuchar evento de búsqueda
-    searchContainer.addEventListener('search', (e) => this._handleSearch(e.detail.query));
+    searchContainer.addEventListener('search', (e) => {
+      const query = e.detail?.query || '';
+      this._handleSearch(query);
+    });
     contentContainer.appendChild(searchContainer);
 
     // Tabs de ordenamiento
@@ -226,7 +230,8 @@ export class CatalogView {
         minPrice: filters.priceMin,
         maxPrice: filters.priceMax,
         year: filters.year,
-        // fuel y mileage pueden añadirse después
+        fuel: filters.fuel
+        // mileage puede añadirse después
       };
       
   // Aplicando filtros: ${JSON.stringify(backendFilters)}

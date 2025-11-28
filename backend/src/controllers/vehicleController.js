@@ -11,6 +11,7 @@ import { Vehicle } from '../models/Vehicle.js';
  * - minPrice: Precio mínimo
  * - maxPrice: Precio máximo
  * - year: Filtrar por año
+ * - fuel: Filtrar por tipo de combustible (gasolina, diesel, electrico, hibrido, etc.)
  * - search: Búsqueda en título y descripción
  * - condition: Filtrar por condición (new, used)
  * 
@@ -49,6 +50,11 @@ export async function getVehicles(req, res, next) {
       filter.year = parseInt(req.query.year);
     }
 
+    // Filtro por combustible
+    if (req.query.fuel && req.query.fuel !== 'all') {
+      filter['specs.fuel'] = req.query.fuel;
+    }
+
     // Filtro por condición (nuevo/usado)
     if (req.query.condition && req.query.condition !== 'all') {
       filter['condition.use'] = req.query.condition;
@@ -64,11 +70,11 @@ export async function getVehicles(req, res, next) {
       ];
     }
 
-  // Filtros aplicados -> ${JSON.stringify(filter)}
+    // Filtros aplicados -> ${JSON.stringify(filter)}
 
     // Contar total de documentos CON filtros
     const total = await Vehicle.countDocuments(filter);
-    
+
     // Obtener vehículos con filtros y paginación
     const vehicles = await Vehicle.find(filter)
       .skip(skip)
@@ -87,7 +93,7 @@ export async function getVehicles(req, res, next) {
         hasNext: page < pages,
         hasPrev: page > 1
       },
-      filters: filter // Devolver filtros aplicados para debug
+      filters: filter // Util para debugging. Se adjunta el filtro aplicado
     });
   } catch (err) {
     console.error('Error al obtener vehículos:', err.message);
@@ -117,13 +123,13 @@ export async function createVehicle(req, res, next) {
   try {
     // Parsear datos del vehículo desde FormData
     let vehicleData = {};
-    
+
     // Si viene 'data' como string JSON (de FormData con 'data' field)
     if (req.body.data && typeof req.body.data === 'string') {
       try {
         vehicleData = JSON.parse(req.body.data);
       } catch (parseErr) {
-        console.error('❌ Error parseando JSON de vehicleData:', parseErr);
+        console.error('Error parseando JSON de vehicleData:', parseErr);
         return res.status(400).json({ error: 'Datos inválidos en formulario' });
       }
     } else if (req.body && typeof req.body === 'object') {
@@ -131,7 +137,7 @@ export async function createVehicle(req, res, next) {
       vehicleData = req.body;
     }
 
-  // vehicleData parseado: (sanitized)
+    // vehicleData parseado: (sanitized)
 
     // Procesar archivos de imágenes (multer los coloca en req.files)
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
@@ -139,25 +145,25 @@ export async function createVehicle(req, res, next) {
     } else {
       vehicleData.images = [];
     }
-    
+
     // Crear el vehículo en MongoDB
     const created = await Vehicle.create(vehicleData);
-    
+
     res.status(201).json(created);
   } catch (err) {
-    console.error('❌ Error al crear vehículo:', err.message);
-    
+    console.error('Error al crear vehículo:', err.message);
+
     // Si es error de validación de Mongoose, mostrar detalles
     if (err.name === 'ValidationError') {
-      return res.status(400).json({ 
-        error: 'Error de validación', 
+      return res.status(400).json({
+        error: 'Error de validación',
         details: Object.keys(err.errors).map(key => ({
           field: key,
           message: err.errors[key].message
         }))
       });
     }
-    
+
     next(err);
   }
 }
@@ -199,15 +205,9 @@ export async function deleteVehicle(req, res, next) {
   }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CONTROLADORES CON AGGREGATION PIPELINES
-// Objetivo educativo: Demostrar operaciones avanzadas de MongoDB
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 /**
- * Obtiene vehículos destacados usando MongoDB Aggregation Pipeline
+ * Obtiene vehículos destacados usando aggregation pipeline
  * 
- * Pipeline educativo:
  * 1. $match: Filtrar nuevos O económicos (precio < 30000)
  * 2. $sort: Ordenar por fecha de creación (más recientes primero)
  * 3. $limit: Máximo 8 resultados
@@ -216,10 +216,8 @@ export async function deleteVehicle(req, res, next) {
  */
 export async function getFeaturedVehicles(req, res, next) {
   try {
-  // Ejecutando aggregation pipeline para vehículos destacados
-    
     const featured = await Vehicle.aggregate([
-      // Stage 1: Filtrar vehículos nuevos O económicos
+      // Filtrar vehículos nuevos o precio menor a umbrales
       {
         $match: {
           $or: [
@@ -228,29 +226,26 @@ export async function getFeaturedVehicles(req, res, next) {
           ]
         }
       },
-      // Stage 2: Ordenar por fecha de creación (más recientes primero)
+      // Ordenar por fecha de creación (más recientes primero)
       {
         $sort: { createdAt: -1 }
       },
-      // Stage 3: Limitar a 8 resultados
+      // Limitar a 8 resultados
       {
         $limit: 8
       }
     ]);
 
-  // Pipeline completado: ${featured.length} vehículos destacados
-    
     res.status(200).json(featured);
   } catch (err) {
-    console.error('❌ Error en aggregation pipeline (featured):', err.message);
+    console.error('Error en aggregation pipeline (featured):', err.message);
     next(err);
   }
 }
 
 /**
- * Obtiene vehículos más baratos usando MongoDB Aggregation Pipeline
+ * Obtiene vehículos más baratos usando aggregation pipeline
  * 
- * Pipeline educativo:
  * 1. $sort: Ordenar por precio ascendente (menor a mayor)
  * 2. $limit: Máximo 8 resultados
  * 
@@ -258,32 +253,27 @@ export async function getFeaturedVehicles(req, res, next) {
  */
 export async function getCheapestVehicles(req, res, next) {
   try {
-  // Ejecutando aggregation pipeline para vehículos más baratos
-    
     const cheapest = await Vehicle.aggregate([
-      // Stage 1: Ordenar por precio (menor a mayor)
+      // Ordenar por precio (menor a mayor)
       {
         $sort: { price: 1 }
       },
-      // Stage 2: Limitar a 8 resultados
+      // Limitar a 8 resultados
       {
         $limit: 8
       }
     ]);
 
-  // Pipeline completado: ${cheapest.length} vehículos más baratos
-    
     res.status(200).json(cheapest);
   } catch (err) {
-    console.error('❌ Error en aggregation pipeline (cheapest):', err.message);
+    console.error('Error en aggregation pipeline (cheapest):', err.message);
     next(err);
   }
 }
 
 /**
- * Obtiene vehículos más recientes usando MongoDB Aggregation Pipeline
+ * Obtiene vehículos más recientes usando aggregation pipeline
  * 
- * Pipeline educativo:
  * 1. $sort: Ordenar por fecha de creación descendente
  * 2. $limit: Máximo 8 resultados
  * 
@@ -291,24 +281,20 @@ export async function getCheapestVehicles(req, res, next) {
  */
 export async function getMostRecentVehicles(req, res, next) {
   try {
-  // Ejecutando aggregation pipeline para vehículos más recientes
-    
     const recent = await Vehicle.aggregate([
-      // Stage 1: Ordenar por fecha de creación (más recientes primero)
+      // Ordenar por fecha de creación (más recientes primero)
       {
         $sort: { createdAt: -1 }
       },
-      // Stage 2: Limitar a 8 resultados
+      // Limitar a 8 resultados
       {
         $limit: 8
       }
     ]);
 
-  // Pipeline completado: ${recent.length} vehículos más recientes
-    
     res.status(200).json(recent);
   } catch (err) {
-    console.error('❌ Error en aggregation pipeline (recent):', err.message);
+    console.error('Error en aggregation pipeline (recent):', err.message);
     next(err);
   }
 }
