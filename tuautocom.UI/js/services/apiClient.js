@@ -11,6 +11,34 @@ import { config } from '../config/config.js';
 class ApiClient {
   constructor() {
     this.baseURL = config.apiUrl;
+    this.timeout = 10000; // 10 segundos de timeout
+  }
+
+  /**
+   * Ejecuta fetch con timeout
+   * @private
+   * @param {string} url - URL completa
+   * @param {Object} options - Opciones de fetch
+   * @returns {Promise<Response>}
+   */
+  async _fetchWithTimeout(url, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error(`Timeout: La petición tardó más de ${this.timeout/1000} segundos`);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -40,7 +68,7 @@ class ApiClient {
    */
   async get(endpoint) {
     try {
-      const response = await fetch(`${this.baseURL}${endpoint}`);
+      const response = await this._fetchWithTimeout(`${this.baseURL}${endpoint}`);
       return this._handleResponse(response);
     } catch (error) {
       console.error(`GET ${endpoint}:`, error);
@@ -59,7 +87,7 @@ class ApiClient {
    */
   async post(endpoint, data) {
     try {
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
+      const response = await this._fetchWithTimeout(`${this.baseURL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

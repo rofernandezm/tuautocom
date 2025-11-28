@@ -69,7 +69,7 @@ async function navigateTo(route) {
       console.log('🔄 Cargando CatalogView');
       currentView = new CatalogView();
       await currentView.init();
-      appContainer.appendChild(currentView.render());
+      appContainer.appendChild(await currentView.render()); // ⚠️ render() es async en CatalogView
       console.log('✅ CatalogView montada');
       break;
       
@@ -77,7 +77,7 @@ async function navigateTo(route) {
       console.log('🔄 Cargando CategoriesView');
       currentView = new CategoriesView();
       await currentView.init();
-      appContainer.appendChild(currentView.render());
+      appContainer.appendChild(await currentView.render());
       console.log('✅ CategoriesView montada');
       break;
       
@@ -90,7 +90,7 @@ async function navigateTo(route) {
       }
       currentView = new VehicleDetailView(param);
       await currentView.init();
-      appContainer.appendChild(currentView.render());
+      appContainer.appendChild(await currentView.render());
       console.log('✅ VehicleDetailView montada');
       break;
       
@@ -114,7 +114,7 @@ async function navigateTo(route) {
         }
         
         await currentView.init();
-        appContainer.appendChild(currentView.render());
+        appContainer.appendChild(await currentView.render());
         console.log('✅ AdminVehicleFormView montada');
       } else {
         console.error('❌ Ruta de administración inválida');
@@ -126,7 +126,7 @@ async function navigateTo(route) {
       console.log('🔄 Cargando InquiriesView');
       currentView = new InquiriesView();
       await currentView.init();
-      appContainer.appendChild(currentView.render());
+      appContainer.appendChild(await currentView.render());
       console.log('✅ InquiriesView montada');
       break;
       
@@ -135,7 +135,7 @@ async function navigateTo(route) {
       console.log('🔄 Cargando HomeView');
       currentView = new HomeView();
       await currentView.init();
-      appContainer.appendChild(currentView.render());
+      appContainer.appendChild(await currentView.render());
       console.log('✅ HomeView montada');
       break;
   }
