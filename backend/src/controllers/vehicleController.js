@@ -1,66 +1,39 @@
 import { Vehicle } from '../models/Vehicle.js';
 
-/**
- * Obtiene vehículos con paginación y filtros
- * 
- * Query params opcionales:
- * - page: Número de página (default: 1)
- * - limit: Vehículos por página (default: 12)
- * - category: Filtrar por categoría (sedan, suv, pickup, etc.)
- * - brand: Filtrar por marca
- * - minPrice: Precio mínimo
- * - maxPrice: Precio máximo
- * - year: Filtrar por año
- * - fuel: Filtrar por tipo de combustible (gasolina, diesel, electrico, hibrido, etc.)
- * - search: Búsqueda en título y descripción
- * - condition: Filtrar por condición (new, used)
- * 
- * @param {Request} req - Request con query params
- * @param {Response} res - Response con vehículos y metadata
- */
+// Obtener lista de vehículos con filtros y paginación
 export async function getVehicles(req, res, next) {
   try {
-    // Parámetros de paginación
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
-
-    // Construir filtro de MongoDB
     const filter = {};
 
-    // Filtro por categoría
     if (req.query.category && req.query.category !== 'all') {
       filter.category = req.query.category;
     }
 
-    // Filtro por marca
     if (req.query.brand && req.query.brand !== 'all') {
       filter.brand = { $regex: req.query.brand, $options: 'i' };
     }
 
-    // Filtro por rango de precio
     if (req.query.minPrice || req.query.maxPrice) {
       filter.price = {};
       if (req.query.minPrice) filter.price.$gte = parseInt(req.query.minPrice);
       if (req.query.maxPrice) filter.price.$lte = parseInt(req.query.maxPrice);
     }
 
-    // Filtro por año
     if (req.query.year && req.query.year !== 'all') {
       filter.year = parseInt(req.query.year);
     }
 
-    // Filtro por combustible
     if (req.query.fuel && req.query.fuel !== 'all') {
       filter['specs.fuel'] = req.query.fuel;
     }
 
-    // Filtro por condición (nuevo/usado)
     if (req.query.condition && req.query.condition !== 'all') {
       filter['condition.use'] = req.query.condition;
     }
 
-    // Búsqueda en título y descripción
     if (req.query.search) {
       filter.$or = [
         { title: { $regex: req.query.search, $options: 'i' } },
@@ -70,12 +43,7 @@ export async function getVehicles(req, res, next) {
       ];
     }
 
-    // Filtros aplicados -> ${JSON.stringify(filter)}
-
-    // Contar total de documentos CON filtros
     const total = await Vehicle.countDocuments(filter);
-
-    // Obtener vehículos con filtros y paginación
     const vehicles = await Vehicle.find(filter)
       .skip(skip)
       .limit(limit)
@@ -121,10 +89,8 @@ export async function getVehicleById(req, res, next) {
 // Crear un nuevo vehículo
 export async function createVehicle(req, res, next) {
   try {
-    // Parsear datos del vehículo desde FormData
     let vehicleData = {};
 
-    // Si viene 'data' como string JSON (de FormData con 'data' field)
     if (req.body.data && typeof req.body.data === 'string') {
       try {
         vehicleData = JSON.parse(req.body.data);
@@ -133,11 +99,8 @@ export async function createVehicle(req, res, next) {
         return res.status(400).json({ error: 'Datos inválidos en formulario' });
       }
     } else if (req.body && typeof req.body === 'object') {
-      // Si viene JSON directo en body
       vehicleData = req.body;
     }
-
-    // vehicleData parseado: (sanitized)
 
     // Procesar archivos de imágenes (multer los coloca en req.files)
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
@@ -153,7 +116,6 @@ export async function createVehicle(req, res, next) {
   } catch (err) {
     console.error('Error al crear vehículo:', err.message);
 
-    // Si es error de validación de Mongoose, mostrar detalles
     if (err.name === 'ValidationError') {
       return res.status(400).json({
         error: 'Error de validación',
@@ -205,15 +167,6 @@ export async function deleteVehicle(req, res, next) {
   }
 }
 
-/**
- * Obtiene vehículos destacados usando aggregation pipeline
- * 
- * 1. $match: Filtrar nuevos O económicos (precio < 30000)
- * 2. $sort: Ordenar por fecha de creación (más recientes primero)
- * 3. $limit: Máximo 8 resultados
- * 
- * @route GET /api/vehicles/featured
- */
 export async function getFeaturedVehicles(req, res, next) {
   try {
     const featured = await Vehicle.aggregate([
@@ -243,14 +196,6 @@ export async function getFeaturedVehicles(req, res, next) {
   }
 }
 
-/**
- * Obtiene vehículos más baratos usando aggregation pipeline
- * 
- * 1. $sort: Ordenar por precio ascendente (menor a mayor)
- * 2. $limit: Máximo 8 resultados
- * 
- * @route GET /api/vehicles/cheapest
- */
 export async function getCheapestVehicles(req, res, next) {
   try {
     const cheapest = await Vehicle.aggregate([
@@ -271,14 +216,6 @@ export async function getCheapestVehicles(req, res, next) {
   }
 }
 
-/**
- * Obtiene vehículos más recientes usando aggregation pipeline
- * 
- * 1. $sort: Ordenar por fecha de creación descendente
- * 2. $limit: Máximo 8 resultados
- * 
- * @route GET /api/vehicles/recent
- */
 export async function getMostRecentVehicles(req, res, next) {
   try {
     const recent = await Vehicle.aggregate([

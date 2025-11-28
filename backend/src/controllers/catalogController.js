@@ -1,24 +1,5 @@
 import { Catalog } from '../models/Catalog.js';
 
-/**
- * Catalog Controller
- * Maneja todas las operaciones relacionadas con catálogos de referencia
- * 
- * OPERACIONES MONGODB:
- * - getAllCatalogs: Catalog.find() → Obtiene todos los catálogos
- * - getCatalogByType: Catalog.findOne({ type }) → Obtiene un catálogo específico
- * - createCatalog: new Catalog().save() → Crea un nuevo catálogo
- * - updateCatalog: catalog.save() → Actualiza un catálogo existente
- * - deleteCatalog: Catalog.findByIdAndDelete() → Elimina un catálogo
- */
-
-/**
- * Obtiene todos los catálogos disponibles
- * Operación MongoDB: Catalog.find()
- * 
- * @route GET /api/catalogs
- * @returns {Array} Array de todos los catálogos
- */
 export const getAllCatalogs = async (req, res, next) => {
   try {
     const catalogs = await Catalog.find().sort({ 'catalogMetadata.order': 1 });
@@ -33,14 +14,6 @@ export const getAllCatalogs = async (req, res, next) => {
   }
 };
 
-/**
- * Obtiene un catálogo específico por tipo
- * Operación MongoDB: Catalog.findOne({ type })
- * 
- * @route GET /api/catalogs/:type
- * @param {string} type - Tipo de catálogo (categories, brands, etc.)
- * @returns {Object} Catálogo solicitado
- */
 export const getCatalogByType = async (req, res, next) => {
   try {
     const { type } = req.params;
@@ -63,14 +36,6 @@ export const getCatalogByType = async (req, res, next) => {
   }
 };
 
-/**
- * Obtiene solo los items de un catálogo (sin metadata)
- * Operación MongoDB: Catalog.getItems(type)
- * 
- * @route GET /api/catalogs/:type/items
- * @param {string} type - Tipo de catálogo
- * @returns {Array} Array de items del catálogo
- */
 export const getCatalogItems = async (req, res, next) => {
   try {
     const { type } = req.params;
@@ -87,14 +52,6 @@ export const getCatalogItems = async (req, res, next) => {
   }
 };
 
-/**
- * Crea un nuevo catálogo
- * Operación MongoDB: new Catalog().save()
- * 
- * @route POST /api/catalogs
- * @body {Object} catalogData - Datos del catálogo a crear
- * @returns {Object} Catálogo creado
- */
 export const createCatalog = async (req, res, next) => {
   try {
     const catalogData = req.body;
@@ -127,15 +84,6 @@ export const createCatalog = async (req, res, next) => {
   }
 };
 
-/**
- * Actualiza un catálogo existente
- * Operación MongoDB: Catalog.findByIdAndUpdate()
- * 
- * @route PUT /api/catalogs/:id
- * @param {string} id - ID del catálogo
- * @body {Object} updates - Datos a actualizar
- * @returns {Object} Catálogo actualizado
- */
 export const updateCatalog = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -164,15 +112,6 @@ export const updateCatalog = async (req, res, next) => {
   }
 };
 
-/**
- * Agrega un item a un catálogo existente
- * Operación MongoDB: catalog.addItem() → catalog.save()
- * 
- * @route POST /api/catalogs/:type/items
- * @param {string} type - Tipo de catálogo
- * @body {Object} itemData - Datos del item a agregar
- * @returns {Object} Catálogo actualizado
- */
 export const addCatalogItem = async (req, res, next) => {
   try {
     const { type } = req.params;
@@ -205,16 +144,6 @@ export const addCatalogItem = async (req, res, next) => {
   }
 };
 
-/**
- * Actualiza un item de un catálogo
- * Operación MongoDB: catalog.updateItem() → catalog.save()
- * 
- * @route PUT /api/catalogs/:type/items/:itemId
- * @param {string} type - Tipo de catálogo
- * @param {string} itemId - ID del item a actualizar
- * @body {Object} updates - Datos a actualizar
- * @returns {Object} Catálogo actualizado
- */
 export const updateCatalogItem = async (req, res, next) => {
   try {
     const { type, itemId } = req.params;
@@ -247,15 +176,6 @@ export const updateCatalogItem = async (req, res, next) => {
   }
 };
 
-/**
- * Elimina (desactiva) un item de un catálogo
- * Operación MongoDB: catalog.removeItem() → catalog.save()
- * 
- * @route DELETE /api/catalogs/:type/items/:itemId
- * @param {string} type - Tipo de catálogo
- * @param {string} itemId - ID del item a eliminar
- * @returns {Object} Catálogo actualizado
- */
 export const deleteCatalogItem = async (req, res, next) => {
   try {
     const { type, itemId } = req.params;
@@ -287,14 +207,6 @@ export const deleteCatalogItem = async (req, res, next) => {
   }
 };
 
-/**
- * Elimina un catálogo completo
- * Operación MongoDB: Catalog.findByIdAndDelete()
- * 
- * @route DELETE /api/catalogs/:id
- * @param {string} id - ID del catálogo
- * @returns {Object} Mensaje de confirmación
- */
 export const deleteCatalog = async (req, res, next) => {
   try {
     const { id } = req.params;

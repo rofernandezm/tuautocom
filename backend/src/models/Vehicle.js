@@ -31,7 +31,4 @@ const vehicleSchema = new mongoose.Schema({
   versionKey: false,
 });
 
-// index para búsquedas comunes
-//vehicleSchema.index({ title: 'text', brand: 1, model: 1 });
-
 export const Vehicle = mongoose.model('Vehicle', vehicleSchema);

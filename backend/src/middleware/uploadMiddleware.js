@@ -5,30 +5,20 @@ import fs from 'fs';
 
 /**
  * Configuración de multer para carga de imágenes
- * 
- * Almacena imágenes en public/uploads/
- * Permite múltiples archivos por request
- * Valida tipo MIME (solo imágenes)
  */
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Directorio para almacenar uploads
 const uploadsDir = path.join(__dirname, '../../public/uploads');
 
-// Crear directorio si no existe
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configuración de almacenamiento
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
-    // Generar nombre único: timestamp-nombreoriginal
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext);
@@ -36,7 +26,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// Validar tipo de archivo (solo imágenes)
 const fileFilter = (req, file, cb) => {
   const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   
@@ -47,7 +36,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Crear instancia de multer
 export const upload = multer({
   storage,
   fileFilter,
@@ -56,13 +44,6 @@ export const upload = multer({
   },
 });
 
-/**
- * Middleware para manejar errores de multer
- * @param {Error} err - Error de multer
- * @param {Object} req - Request
- * @param {Object} res - Response
- * @param {Function} next - Siguiente middleware
- */
 export function handleMulterError(err, req, res, next) {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -81,6 +62,5 @@ export function handleMulterError(err, req, res, next) {
   if (err) {
     return res.status(400).json({ error: err.message });
   }
-  
   next();
 }
