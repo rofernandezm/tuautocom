@@ -7,9 +7,14 @@
  * Uso: node scripts/setup-dev-env.js
  */
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Colores para consola (funciona en Windows 10+, macOS, Linux)
 const colors = {
@@ -139,8 +144,6 @@ async function setupEnvFile(source, target, name) {
 }
 
 function openInEditor(filePath) {
-  const { spawn } = require('child_process');
-
   let editor;
   let args = [];
 
