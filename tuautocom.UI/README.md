@@ -1,54 +1,62 @@
 # TuAutoCom UI
 
-Frontend application built with Vanilla JavaScript and ES Modules + Tailwind CSS.
+Frontend application built with Vanilla JavaScript (ES6+) and Tailwind CSS.
 
-## Project Structure
+## 📁 Estructura del Proyecto
 
 ```
 tuautocom.UI/
-├── .vscode/                # VS Code configuration
-│   ├── agent/             # Agent documentation and context
-│   │   ├── AGENT.md       # AI Agent instructions
-│   │   ├── CONTEXT.md     # Project context and decisions
-│   │   └── README.md
-│   └── mcp.json
-├── designs/                # Raw designs from Stitch (temporary)
 ├── js/
-│   ├── main.js            # Application entry point
-│   ├── config/            # Configuration files
-│   ├── components/        # Reusable UI components
-│   ├── views/             # Page views
-│   ├── services/          # API services and data layer
-│   └── utils/             # Utility functions
+│   ├── main.js            # Punto de entrada
+│   ├── components/        # Componentes reutilizables
+│   ├── views/             # Vistas de páginas
+│   ├── services/          # Servicios de API
+│   ├── utils/             # Utilidades
+│   └── config/            # Configuración
 ├── styles/
-│   ├── input.css          # Tailwind source (edit this)
-│   ├── output.css         # Compiled CSS (generated)
-│   └── main.css           # Custom styles (optional)
+│   ├── input.scss         # SASS fuente (editar aquí)
+│   └── output.css         # CSS compilado (generado)
 ├── index.html
 ├── package.json
 ├── tailwind.config.js
 └── postcss.config.js
 ```
 
-## Development
+## ⚡ Instalación
 
-To run the application locally, you'll need a local server due to ES Modules CORS restrictions.
-
-### Using Python:
 ```bash
-python -m http.server 8000
+cd tuautocom.UI
+pnpm install
 ```
 
-### Using Node.js (http-server):
+## 🚀 Ejecutar
+
+**Desarrollo (Watch mode):**
 ```bash
-npx http-server -p 8000
+pnpm run dev
 ```
 
-Then open `http://localhost:8000` in your browser.
+**Build para producción:**
+```bash
+pnpm run build:prod
+```
 
-## Features
+**Servir localmente:**
+```bash
+pnpm run serve
+```
 
-- Pure Vanilla JavaScript
-- ES6+ Modules
-- Component-based architecture
-- Service layer for API calls
+Abre http://localhost:8000 en tu navegador.
+
+## 📋 Requisitos
+
+- Node.js v18+
+- pnpm v8.0+
+- Backend API ejecutándose en http://localhost:3000
+
+## 🔧 Stack
+
+- **Frontend**: Vanilla JavaScript (ES Modules)
+- **Estilos**: Tailwind CSS + SASS
+- **Build**: PostCSS + Tailwind CLI
+- **Package Manager**: pnpm
